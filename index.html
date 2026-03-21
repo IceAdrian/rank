@@ -637,7 +637,10 @@
                 globalStats[tId].winrate = total > 0 ? (globalStats[tId].wins / total) * 100 : 0;
             }
         }
-        localStorage.setItem('lehrerRankingAllTime', JSON.stringify(globalStats));
+        
+        // --- NEU: Änderung hier von LocalStorage zu Server ---
+        saveServerStats();
+        
         roundHistory.splice(roundIndex, 1);
         localStorage.setItem('lehrerRankingHistory', JSON.stringify(roundHistory));
         renderAdminGrid(); renderHistoryList();
@@ -689,13 +692,41 @@
     let currentSortType = 'winrate'; let sortAscending = false; 
     let isAllTimeOnlyMode = false; let duelsPlayed = 0; 
 
-    let globalStats = JSON.parse(localStorage.getItem('lehrerRankingAllTime')) || {};
+    // --- NEU: Globale Stats über Cloudflare anstatt LocalStorage ---
+    let globalStats = {};
 
-    allTeachers.forEach(t => {
-        knownResults[t.id] = {};
-        if (!globalStats[t.id]) globalStats[t.id] = { wins: 0, losses: 0, ties: 0, diff: 0, winrate: 0 };
-        if(globalStats[t.id].ties === undefined) globalStats[t.id].ties = 0;
-    });
+    async function loadServerStats() {
+        try {
+            const response = await fetch('/api/stats');
+            if (response.ok) {
+                globalStats = await response.json();
+            } else {
+                globalStats = {}; 
+            }
+        } catch (e) {
+            console.error("Konnte nicht vom Server laden, nutze leere Stats", e);
+            globalStats = {};
+        }
+
+        allTeachers.forEach(t => {
+            knownResults[t.id] = {};
+            if (!globalStats[t.id]) globalStats[t.id] = { wins: 0, losses: 0, ties: 0, diff: 0, winrate: 0 };
+            if (globalStats[t.id].ties === undefined) globalStats[t.id].ties = 0;
+        });
+    }
+
+    async function saveServerStats() {
+        try {
+            await fetch('/api/stats', {
+                method: 'POST',
+                body: JSON.stringify(globalStats),
+                headers: { 'Content-Type': 'application/json' }
+            });
+            console.log("Erfolgreich auf Cloudflare gespeichert!");
+        } catch (e) {
+            console.error("Fehler beim Speichern auf dem Server", e);
+        }
+    }
 
     function getRemainingDuelsCount() {
         let count = 0;
@@ -745,7 +776,6 @@
             if (lehrerClicks >= 2) { 
                 let pwd = prompt("Bitte Admin-Passwort eingeben:");
                 if (pwd !== null) {
-                    // Verschleierte Hash-Prüfung (Hash-Wert von "11" ist 1568)
                     let h = 0; 
                     for(let i = 0; i < pwd.length; i++) {
                         h = Math.imul(31, h) + pwd.charCodeAt(i) | 0;
@@ -767,7 +797,10 @@
     function resetAllTimeStats() {
         if(confirm("ACHTUNG: Möchtest du wirklich ALLE All-Time Statistiken auf 0 setzen?")) {
             allTeachers.forEach(t => { globalStats[t.id] = { wins: 0, losses: 0, ties: 0, diff: 0, winrate: 0 }; });
-            localStorage.setItem('lehrerRankingAllTime', JSON.stringify(globalStats)); renderAdminGrid(); alert("Zurückgesetzt!");
+            
+            // --- NEU: Änderung hier von LocalStorage zu Server ---
+            saveServerStats(); 
+            renderAdminGrid(); alert("Zurückgesetzt!");
         }
     }
     function renderAdminGrid() {
@@ -791,11 +824,20 @@
             let w = parseInt(document.getElementById(`admin-wins-${teacher.id}`).value) || 0; let l = parseInt(document.getElementById(`admin-losses-${teacher.id}`).value) || 0; let t = parseInt(document.getElementById(`admin-ties-${teacher.id}`).value) || 0;
             globalStats[teacher.id] = { wins: w, losses: l, ties: t, diff: w - l, winrate: (w+l+t)>0 ? (w/(w+l+t))*100 : 0 };
         });
-        localStorage.setItem('lehrerCustomData', JSON.stringify(customDataToSave)); localStorage.setItem('lehrerRankingAllTime', JSON.stringify(globalStats));
+        localStorage.setItem('lehrerCustomData', JSON.stringify(customDataToSave)); 
+        
+        // --- NEU: Änderung hier von LocalStorage zu Server ---
+        saveServerStats();
+        
         allTeachers.sort((a, b) => getLastName(a.name).localeCompare(getLastName(b.name))); renderTeacherSelectionGrid(); closeAdmin(); alert("Gespeichert!");
     }
 
-    window.onload = () => { initProfileButtons(); renderTeacherSelectionGrid(); };
+    // --- NEU: Window Onload mit await ---
+    window.onload = async () => { 
+        initProfileButtons(); 
+        await loadServerStats();
+        renderTeacherSelectionGrid(); 
+    };
 
     function renderTeacherSelectionGrid() {
         const grid = document.getElementById('teacher-grid'); grid.innerHTML = ''; 
@@ -990,7 +1032,8 @@
         });
 
         if (duelsPlayed > 0) {
-            localStorage.setItem('lehrerRankingAllTime', JSON.stringify(globalStats));
+            // --- NEU: Änderung hier von LocalStorage zu Server ---
+            saveServerStats();
             saveRoundToHistory(sessionDelta); 
         }
     }
