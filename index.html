@@ -96,7 +96,7 @@
         .controls { margin-bottom: 25px; display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; }
         
         .teacher-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; text-align: left; margin-bottom: 30px; }
-        .teacher-item { padding: 12px 10px; border-radius: 12px; border: 2px solid transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s; user-select: none; position: relative; -webkit-tap-highlight-color: transparent; }
+        .teacher-item { padding: 12px 10px; border-radius: 12px; border: 2px solid transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s, border-color 0.3s; user-select: none; position: relative; -webkit-tap-highlight-color: transparent; }
         .teacher-item.male { background: #f0f7ff; border-color: #d6e8ff; }
         .teacher-item.female { background: #fff0f5; border-color: #ffd6e6; }
         @media (hover: hover) { .teacher-item:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.05); } }
@@ -114,14 +114,14 @@
 
         .battle-arena { display: flex; justify-content: center; align-items: stretch; gap: 35px; margin-top: 20px; opacity: 1; transition: opacity 0.3s ease; }
         .card { width: 45%; max-width: 450px; background: #fff; border: 2px solid #f8f9fa; border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); display: flex; flex-direction: column; justify-content: space-between; transition: all 0.3s; }
-        .big-name-display { height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 16px; margin-bottom: 25px; border: 2px solid transparent; padding: 15px; transition: transform 0.2s ease, background 0.3s; }
+        .big-name-display { height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 16px; margin-bottom: 25px; border: 2px solid transparent; padding: 15px; transition: transform 0.2s ease, background 0.3s, border-color 0.3s; }
         .big-name-display.male { background: linear-gradient(135deg, #f0f7ff, #e0f0ff); border-color: #b8d4ff; }
         .big-name-display.female { background: linear-gradient(135deg, #fff0f5, #ffe6f0); border-color: #ffb8d4; }
         .big-name-display .prefix { font-size: 16px; color: #6c757d; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px; }
         .big-name-display .last-name { font-size: 34px; font-weight: 900; color: #2c3e50; text-align: center; word-break: break-word; line-height: 1.1; transition: color 0.3s; }
         .big-name-display.male .last-name { color: #0056b3; }
         .big-name-display.female .last-name { color: #c2185b; }
-        .flash-green { box-shadow: 0 0 35px rgba(40, 167, 69, 0.4) !important; transform: scale(1.03); border-color: #28a745; }
+        .flash-green { box-shadow: 0 0 35px rgba(40, 167, 69, 0.4) !important; transform: scale(1.03); border-color: #28a745 !important; }
         .vs { font-size: 28px; font-weight: 900; color: #adb5bd; display: flex; align-items: center; padding: 0 10px; transition: color 0.3s;}
         
         button { padding: 12px 24px; font-size: 15px; font-weight: bold; cursor: pointer; border: none; border-radius: 12px; transition: all 0.2s ease; outline: none; box-shadow: 0 4px 6px rgba(0,0,0,0.05); -webkit-tap-highlight-color: transparent; }
@@ -265,51 +265,106 @@
         .history-item:last-child { border-bottom: none; }
         .history-date { color: #007bff; font-weight: bold; }
 
-        /* --- DARK MODE STYLES --- */
+        /* --- DARK MODE STYLES (GOLD & GLOW EDITION) --- */
         body.dark-mode { background: #121212; color: #e0e0e0; }
-        body.dark-mode .container { background: #1e1e1e; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        body.dark-mode .container { background: #1e1e1e; box-shadow: 0 10px 50px rgba(0,0,0,0.8); }
         body.dark-mode h2, body.dark-mode h3 { color: #f8f9fa; }
-        body.dark-mode .profile-section { background: #2c2c2c; border-color: #444; }
+        body.dark-mode .profile-section { background: #242424; border-color: #444; }
         body.dark-mode .profile-title { color: #adb5bd; }
         body.dark-mode .profile-btn { background: #2c2c2c; color: #e0e0e0; border-color: #555; }
         body.dark-mode .profile-btn:hover { border-color: #888; }
-        body.dark-mode .profile-btn.active { background: #007bff; color: white; border-color: #007bff; }
+        body.dark-mode .profile-btn.active { background: #007bff; color: white; border-color: #007bff; box-shadow: 0 0 15px rgba(0,123,255,0.4); }
         body.dark-mode #search-input { background: #2c2c2c; color: #e0e0e0; border-color: #444; }
+        body.dark-mode #search-input:focus { border-color: #ffd700; box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); }
+        
+        /* Lehrer Auswahl - Gold Glow */
         body.dark-mode .teacher-item.male { background: #1c2b3a; border-color: #2a3f54; }
         body.dark-mode .teacher-item.female { background: #3a1c27; border-color: #542a3a; }
         body.dark-mode .teacher-lastname { color: #f8f9fa; }
-        body.dark-mode .teacher-item.male.selected { background: #244163; border-color: #4a90e2; }
-        body.dark-mode .teacher-item.female.selected { background: #63243d; border-color: #e83e8c; }
+        
+        body.dark-mode .teacher-item.male.selected,
+        body.dark-mode .teacher-item.female.selected { 
+            background: rgba(255, 215, 0, 0.1); 
+            border-color: #ffd700; 
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); 
+            transform: translateY(-2px);
+        }
+
         body.dark-mode .progress-container { background: #333; }
-        body.dark-mode .card { background: #242424; border-color: #333; }
+        body.dark-mode .progress-bar-fill { background: linear-gradient(90deg, #b8860b, #ffd700); box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+        
+        /* Duell Arena - Gold Hover & Vote */
+        body.dark-mode .card { background: #242424; border-color: #333; transition: all 0.3s ease; }
+        body.dark-mode .card:hover { box-shadow: 0 0 25px rgba(255, 215, 0, 0.2); border-color: rgba(255, 215, 0, 0.4); transform: translateY(-4px); }
+        
         body.dark-mode .big-name-display.male { background: linear-gradient(135deg, #1c2b3a, #244163); border-color: #2a3f54; }
         body.dark-mode .big-name-display.female { background: linear-gradient(135deg, #3a1c27, #63243d); border-color: #542a3a; }
-        body.dark-mode .big-name-display .last-name { color: #f8f9fa; }
+        body.dark-mode .big-name-display .last-name { color: #f8f9fa; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
         body.dark-mode .big-name-display.male .last-name { color: #8cb4f5; }
         body.dark-mode .big-name-display.female .last-name { color: #f58cb4; }
-        body.dark-mode .vs { color: #666; }
-        body.dark-mode .top10-sidebar { background: #2a281e; border-color: #b8860b; }
-        body.dark-mode .top10-sidebar h3 { color: #ffd700; border-bottom-color: #665500; }
+        
+        body.dark-mode .vs { color: #666; text-shadow: 0 0 10px rgba(255,255,255,0.1); }
+        
+        /* Goldener Vote-Button in Dark Mode */
+        body.dark-mode .btn-vote { 
+            background: linear-gradient(135deg, #3a321a, #2a2412); 
+            color: #ffd700; 
+            border: 1px solid #b8860b; 
+            box-shadow: inset 0 0 10px rgba(255,215,0,0.1);
+            transition: all 0.3s;
+        }
+        body.dark-mode .btn-vote:hover { 
+            background: linear-gradient(135deg, #ffd700, #ffb300); 
+            color: #121212; 
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); 
+            border-color: #fff;
+        }
+
+        /* Goldener Blitz beim Abstimmen */
+        body.dark-mode .flash-green { 
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.7) !important; 
+            border-color: #ffd700 !important; 
+            transform: scale(1.05);
+            background: rgba(255, 215, 0, 0.05);
+        }
+        
+        /* Ergebnisse in Gold */
+        body.dark-mode .top10-sidebar { background: #2a281e; border-color: #ffd700; box-shadow: 0 0 20px rgba(255, 215, 0, 0.15); }
+        body.dark-mode .top10-sidebar h3 { color: #ffd700; border-bottom-color: #665500; text-shadow: 0 0 10px rgba(255,215,0,0.3); }
         body.dark-mode .top10-list li { background: #2c2c2c; border-color: #444; color: #e0e0e0; }
-        body.dark-mode .top10-list li.rank-1 { background: linear-gradient(135deg, #332d18, #443c22); border-color: #ffd700; }
+        body.dark-mode .top10-list li.rank-1 { background: linear-gradient(135deg, #3a321a, #2a2412); border-color: #ffd700; box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); }
         body.dark-mode .top10-list .name { color: #e0e0e0; }
-        body.dark-mode .top10-list li.rank-1 .name { color: #ffd700; }
+        body.dark-mode .top10-list li.rank-1 .name { color: #ffd700; text-shadow: 0 0 5px rgba(255,215,0,0.4); }
+        
         body.dark-mode .full-list-main { background: #1e1e1e; border-color: #444; }
+        
+        body.dark-mode .all-time-glow {
+            border: 3px solid #ffd700 !important;
+            background: #1e1e1e !important;
+            animation: darkGoldGlow 2.5s infinite alternate;
+        }
+        @keyframes darkGoldGlow {
+            from { box-shadow: 0 0 10px rgba(255, 215, 0, 0.1); }
+            to { box-shadow: 0 0 30px rgba(255, 215, 0, 0.4); }
+        }
+
         body.dark-mode .results-table th { background: #2c2c2c; color: #adb5bd; border-color: #444; }
         body.dark-mode .results-table th.sortable:not(.active-sort):hover { background: #3a3a3a; color: #fff; }
         body.dark-mode .results-table td { background: #242424; color: #e0e0e0; border-color: #444; }
         body.dark-mode .results-table td.name-col { color: #e0e0e0; }
-        body.dark-mode .results-table th.active-sort { background: #1c2b3a; color: #66b0ff; border-color: #2a3f54; }
-        body.dark-mode .results-table th.active-sort:hover { background: #1c2b3a; }
+        body.dark-mode .results-table th.active-sort { background: #2a2412; color: #ffd700; border-color: #b8860b; }
+        body.dark-mode .results-table th.active-sort:hover { background: #2a2412; }
+        
         body.dark-mode .results-table tr.rank-row-1 td { background: #2a281e; border-color: #665500; }
-        body.dark-mode .results-table tr.rank-row-1 td.name-col { color: #ffd700; }
+        body.dark-mode .results-table tr.rank-row-1 td.name-col { color: #ffd700; text-shadow: 0 0 5px rgba(255,215,0,0.4); }
         body.dark-mode .results-table tr.rank-row-2 td { background: #242424; border-color: #444; }
         body.dark-mode .results-table tr.rank-row-3 td { background: #28211a; border-color: #553311; }
+        
         body.dark-mode .admin-item { background: #2c2c2c; border-color: #444; }
         body.dark-mode .admin-item input { background: #333; border-color: #555; color: #e0e0e0; }
         body.dark-mode .history-list { background: #2c2c2c; border-color: #444; }
         body.dark-mode .history-item { border-color: #444; }
-        body.dark-mode #dark-mode-toggle { background: #333; color: #fff; border: 1px solid #555; }
+        body.dark-mode #dark-mode-toggle { background: #2c2c2c; color: #fff; border: 1px solid #555; }
         
     </style>
 </head>
@@ -541,7 +596,6 @@
     // --- Runden Historie ---
     let roundHistory = JSON.parse(localStorage.getItem('lehrerRankingHistory')) || [];
     let currentSessionDuelsLog = []; 
-    // NEU: Historie für Undo
     let voteHistoryStack = []; 
 
     function saveRoundToHistory(sessionDelta) {
@@ -592,7 +646,7 @@
     function renderHistoryList() {
         const list = document.getElementById('history-list'); list.innerHTML = '';
         if (roundHistory.length === 0) {
-            list.innerHTML = '<div class="history-item" style="color:#666; text-align:center;">Noch keine Runden gespielt.</div>'; return;
+            list.innerHTML = `<div class="history-item" style="color:${isDarkMode?'#aaa':'#666'}; text-align:center;">Noch keine Runden gespielt.</div>`; return;
         }
         roundHistory.forEach(r => {
             const div = document.createElement('div'); div.className = 'history-item';
@@ -666,7 +720,7 @@
 
     function clearSearch() { document.getElementById('search-input').value = ''; filterTeachers(); }
 
-    // Admin & Secret Logic
+    // Admin & Secret Logic - NEUES GEHEIMES HASH-VERFAHREN
     let statsClicks = 0; let statsTimer;
     document.getElementById('trigger-stats').addEventListener('click', () => {
         statsClicks++; clearTimeout(statsTimer);
@@ -690,11 +744,18 @@
             lehrerClicks++;
             if (lehrerClicks >= 2) { 
                 let pwd = prompt("Bitte Admin-Passwort eingeben:");
-                // NEU: Verschleierte Passwortabfrage (MTE= ist Base64 für "11")
-                if(pwd && btoa(pwd.trim()) === "MTE=") {
-                    openAdmin(); 
-                } else if(pwd !== null) {
-                    alert("Falsches Passwort! Zugriff verweigert.");
+                if (pwd !== null) {
+                    // Verschleierte Hash-Prüfung (Hash-Wert von "11" ist 1568)
+                    let h = 0; 
+                    for(let i = 0; i < pwd.length; i++) {
+                        h = Math.imul(31, h) + pwd.charCodeAt(i) | 0;
+                    }
+                    
+                    if (h === 1568) {
+                        openAdmin(); 
+                    } else {
+                        alert("Falsches Passwort! Zugriff verweigert.");
+                    }
                 }
                 welcheClicks = 0; lehrerClicks = 0; clearTimeout(secretTimer); 
             }
@@ -762,7 +823,6 @@
     }
 
     function handleSelectionChange() {
-        // Reset Undo Stack falls man Lehrer nachträglich ändert
         voteHistoryStack = [];
         document.getElementById('btn-undo').style.display = 'none';
 
@@ -846,7 +906,6 @@
         isVoting = false;
     }
 
-    // --- NEU: UNDO LOGIK ---
     function undoLastVote() {
         if (voteHistoryStack.length === 0 || isVoting) return;
 
@@ -881,7 +940,6 @@
     function vote(choice) {
         if (isVoting || !currentMatch) return; isVoting = true;
 
-        // Zustand für Undo sichern
         voteHistoryStack.push({
             match: [...currentMatch],
             knownResults: JSON.parse(JSON.stringify(knownResults)),
