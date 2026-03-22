@@ -1270,3 +1270,18 @@ document.getElementById('ice-start-screen').classList.add('hidden');
 document.getElementById('leaderboard-screen').classList.add('hidden'); 
 document.getElementById('ranked-setup-screen').classList.remove('hidden');
 document.getElementById('ranked-name-input').value = localStorage.getItem('lastRankedName') || "";
+
+// --- NEU: Mobile Leaderboard Toggle Logik ---
+const mobileLbToggle = document.getElementById('mobile-lb-toggle');
+if (mobileLbToggle) {
+    mobileLbToggle.addEventListener('click', () => {
+        const lb = document.getElementById('live-leaderboard');
+        if (lb.classList.contains('mobile-open')) {
+            lb.classList.remove('mobile-open');
+            mobileLbToggle.innerHTML = '👤 Profil & Ranking';
+        } else {
+            lb.classList.add('mobile-open');
+            mobileLbToggle.innerHTML = '◀ Schließen';
+        }
+    });
+}
