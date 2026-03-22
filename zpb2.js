@@ -1,1 +1,0 @@
-const zpb1Base64 = ""
