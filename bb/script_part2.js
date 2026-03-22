@@ -695,7 +695,8 @@ function clearPreview() {
 let isDragging = false, activeShape = null, draggedShapeKey = null;
 let startMouseX = 0, startMouseY = 0, startElementX = 0, startElementY = 0;
 let currentTargetRow = -1, currentTargetCol = -1;
-let currentScale = 1; // NEU: Speichert die aktuelle Handy-Skalierung
+let lastPreviewRow = -1, lastPreviewCol = -1; // Performance-Boost Variable
+let currentScale = 1; 
 
 shapeSlots.forEach((slot, index) => {
     slot.addEventListener('pointerdown', (e) => {
@@ -705,6 +706,8 @@ shapeSlots.forEach((slot, index) => {
         
         currentTargetRow = -1;
         currentTargetCol = -1;
+        lastPreviewRow = -1; 
+        lastPreviewCol = -1; 
         
         isDragging = true; activeShape = shape; draggedShapeKey = shape.dataset.shape;
         const shapeData = shapeDefinitions[draggedShapeKey];
@@ -719,7 +722,6 @@ shapeSlots.forEach((slot, index) => {
         const newWidth = shapeData.matrix[0].length * 70 + (shapeData.matrix[0].length - 1) * 2;
         const newHeight = shapeData.matrix.length * 70 + (shapeData.matrix.length - 1) * 2;
         
-        // Skalierung des Spielfelds berechnen (wichtig fürs Handy!)
         const container = document.getElementById('game-container');
         const rect = container.getBoundingClientRect();
         currentScale = rect.width / container.offsetWidth || 1;
@@ -727,7 +729,6 @@ shapeSlots.forEach((slot, index) => {
         startMouseX = e.clientX; 
         startMouseY = e.clientY;
         
-        // Position exakt an den Finger anpassen (unter Berücksichtigung der Skalierung)
         startElementX = (e.clientX - rect.left) / currentScale - (newWidth / 2);
         startElementY = (e.clientY - rect.top) / currentScale - newHeight - 50; 
 
@@ -746,7 +747,6 @@ shapeSlots.forEach((slot, index) => {
 document.addEventListener('pointermove', (e) => {
     if (!isDragging || !activeShape) return;
     
-    // Finger-Bewegung durch die Skalierung teilen, damit der Block nicht zu schnell fliegt
     const dx = (e.clientX - startMouseX) / currentScale; 
     const dy = (e.clientY - startMouseY) / currentScale;
     
@@ -756,60 +756,70 @@ document.addEventListener('pointermove', (e) => {
     const activeRect = activeShape.getBoundingClientRect();
     const boardRect = boardElement.getBoundingClientRect();
     
-    clearPreview(); currentTargetRow = -1; currentTargetCol = -1;
-
     const xInsideBoard = activeRect.left - boardRect.left;
     const yInsideBoard = activeRect.top - boardRect.top;
     
-    // Die Zellengröße (72) muss auf dem Handy ebenfalls runterskaliert werden für das Grid!
     const cellSize = 72 * currentScale;
     const col = Math.floor((xInsideBoard + (cellSize / 2)) / cellSize);
     const row = Math.floor((yInsideBoard + (cellSize / 2)) / cellSize);
 
-    const shapeData = shapeDefinitions[draggedShapeKey];
-    const activeColor = activeShape.dataset.color; 
-    
-    if (canPlace(shapeData, row, col)) {
-        currentTargetRow = row;
-        currentTargetCol = col;
-        for (let r = 0; r < shapeData.matrix.length; r++) {
-            for (let c = 0; c < shapeData.matrix[r].length; c++) {
-                if (shapeData.matrix[r][c] === 1) {
-                    const targetCell = document.querySelector(`.cell[data-row="${row + r}"][data-col="${col + c}"]`);
-                    if (targetCell) { targetCell.classList.add('preview'); targetCell.classList.add(activeColor); }
-                }
-            }
-        }
+    // PERFORMANCE BOOST: Aktualisiert die Vorschau nur bei Feld-Wechsel
+    if (row !== lastPreviewRow || col !== lastPreviewCol) {
+        lastPreviewRow = row;
+        lastPreviewCol = col;
+        
+        clearPreview(); 
+        currentTargetRow = -1; 
+        currentTargetCol = -1;
 
-        let tempRowCounts = Array(rows).fill(0);
-        let tempColCounts = Array(cols).fill(0);
+        const shapeData = shapeDefinitions[draggedShapeKey];
+        const activeColor = activeShape.dataset.color; 
         
-        for (let r = 0; r < rows; r++) {
-            for (let c = 0; c < cols; c++) {
-                if (boardState[r][c] !== null) { tempRowCounts[r]++; tempColCounts[c]++; }
-            }
-        }
-        
-        for (let r = 0; r < shapeData.matrix.length; r++) {
-            for (let c = 0; c < shapeData.matrix[r].length; c++) {
-                if (shapeData.matrix[r][c] === 1) { tempRowCounts[row + r]++; tempColCounts[col + c]++; }
-            }
-        }
-        
-        for (let r = 0; r < rows; r++) {
-            if (tempRowCounts[r] === cols) {
-                for (let c = 0; c < cols; c++) {
-                    const cell = document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
-                    if (cell) cell.classList.add('will-clear');
+        if (canPlace(shapeData, row, col)) {
+            currentTargetRow = row;
+            currentTargetCol = col;
+            
+            // 1. Vorschau zeichnen
+            for (let r = 0; r < shapeData.matrix.length; r++) {
+                for (let c = 0; c < shapeData.matrix[r].length; c++) {
+                    if (shapeData.matrix[r][c] === 1) {
+                        const targetCell = document.querySelector(`.cell[data-row="${row + r}"][data-col="${col + c}"]`);
+                        if (targetCell) { targetCell.classList.add('preview'); targetCell.classList.add(activeColor); }
+                    }
                 }
             }
-        }
-        
-        for (let c = 0; c < cols; c++) {
-            if (tempColCounts[c] === rows) {
-                for (let r = 0; r < rows; r++) {
-                    const cell = document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
-                    if (cell) cell.classList.add('will-clear');
+
+            // 2. Prüfen, ob eine Linie aufgelöst wird (Vorschau-Leuchten)
+            let tempRowCounts = Array(rows).fill(0);
+            let tempColCounts = Array(cols).fill(0);
+            
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    if (boardState[r][c] !== null) { tempRowCounts[r]++; tempColCounts[c]++; }
+                }
+            }
+            
+            for (let r = 0; r < shapeData.matrix.length; r++) {
+                for (let c = 0; c < shapeData.matrix[r].length; c++) {
+                    if (shapeData.matrix[r][c] === 1) { tempRowCounts[row + r]++; tempColCounts[col + c]++; }
+                }
+            }
+            
+            for (let r = 0; r < rows; r++) {
+                if (tempRowCounts[r] === cols) {
+                    for (let c = 0; c < cols; c++) {
+                        const cell = document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
+                        if (cell) cell.classList.add('will-clear');
+                    }
+                }
+            }
+            
+            for (let c = 0; c < cols; c++) {
+                if (tempColCounts[c] === rows) {
+                    for (let r = 0; r < rows; r++) {
+                        const cell = document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
+                        if (cell) cell.classList.add('will-clear');
+                    }
                 }
             }
         }
@@ -877,6 +887,8 @@ document.addEventListener('pointerup', (e) => {
     draggedShapeKey = null;
     currentTargetRow = -1;
     currentTargetCol = -1;
+    lastPreviewRow = -1; // Reset
+    lastPreviewCol = -1; // Reset
     clearPreview();
 });
 
