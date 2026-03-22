@@ -2,19 +2,35 @@
 // SCRIPT PART 2: Spiellogik, Events & UI
 // ==========================================
 
-// --- NEU: RANGELISTE SETUP (Avatare im Live-Leaderboard) ---
-function updatePicPreview(base64) {
-    const preview = document.getElementById('live-pic-preview');
-    if (base64) {
-        preview.innerHTML = `<img src="${base64}" style="width: 100%; height: 100%; object-fit: cover;">`;
-        preview.style.borderColor = '#68cd56';
-    } else {
-        preview.innerHTML = '👤';
-        preview.style.borderColor = '#a9b7d6';
-    }
+// --- PROFILBILD-LOGIK (Synchronisiert Live & Setup) ---
+function updatePicPreviews(base64) {
+    const livePreview = document.getElementById('live-pic-preview');
+    const setupPreview = document.getElementById('ranked-pic-preview');
+    let html = base64 ? `<img src="${base64}" style="width: 100%; height: 100%; object-fit: cover;">` : '👤';
+    let borderColor = base64 ? '#68cd56' : '#a9b7d6';
+
+    if (livePreview) { livePreview.innerHTML = html; livePreview.style.borderColor = borderColor; }
+    if (setupPreview) { setupPreview.innerHTML = html; setupPreview.style.borderColor = borderColor; }
 }
 
-// Menü ausklappen, wenn man auf das Profilbild links klickt
+function clearPic() {
+    currentRankedPicBase64 = "";
+    const setupInput = document.getElementById('setup-pic-input');
+    const liveInput = document.getElementById('ranked-pic-input');
+    if(setupInput) setupInput.value = "";
+    if(liveInput) liveInput.value = "";
+
+    document.querySelectorAll('.preset-avatar').forEach(a => a.classList.remove('selected'));
+
+    const clearBtnLive = document.getElementById('clear-pic-btn');
+    const clearBtnSetup = document.getElementById('setup-clear-pic-btn');
+    if(clearBtnLive) clearBtnLive.style.display = 'none';
+    if(clearBtnSetup) clearBtnSetup.style.display = 'none';
+
+    updatePicPreviews("");
+}
+
+// Live-Menu ausklappen
 document.getElementById('live-pic-preview').addEventListener('click', () => {
     const selector = document.getElementById('live-avatar-selector');
     if (selector.style.display === 'none' || selector.style.display === '') {
@@ -24,34 +40,72 @@ document.getElementById('live-pic-preview').addEventListener('click', () => {
     }
 });
 
+// Löschen-Buttons verknüpfen
+document.getElementById('ranked-pic-preview').addEventListener('click', clearPic);
+if (document.getElementById('clear-pic-btn')) document.getElementById('clear-pic-btn').addEventListener('click', clearPic);
+if (document.getElementById('setup-clear-pic-btn')) document.getElementById('setup-clear-pic-btn').addEventListener('click', clearPic);
+
+// Bild-Upload Logik
+function handlePicUpload(e) {
+    document.querySelectorAll('.preset-avatar').forEach(a => a.classList.remove('selected'));
+    const file = e.target.files[0];
+    if (file) {
+        resizeImage(file, function(resizedBase64) {
+            currentRankedPicBase64 = resizedBase64;
+            const clearBtnLive = document.getElementById('clear-pic-btn');
+            const clearBtnSetup = document.getElementById('setup-clear-pic-btn');
+            if(clearBtnLive) clearBtnLive.style.display = 'block';
+            if(clearBtnSetup) clearBtnSetup.style.display = 'block';
+            updatePicPreviews(currentRankedPicBase64);
+        });
+    }
+}
+if (document.getElementById('ranked-pic-input')) document.getElementById('ranked-pic-input').addEventListener('change', handlePicUpload);
+if (document.getElementById('setup-pic-input')) document.getElementById('setup-pic-input').addEventListener('change', handlePicUpload);
+
+// Emojis für BEIDE Menüs erstellen
+const presetContainers = [document.getElementById('preset-avatars'), document.getElementById('setup-preset-avatars')];
 emojisAvatars.forEach(emoji => {
-    const div = document.createElement('div');
-    div.className = 'preset-avatar';
-    div.innerText = emoji;
-    div.addEventListener('click', () => {
-        document.querySelectorAll('.preset-avatar').forEach(a => a.classList.remove('selected'));
-        div.classList.add('selected');
-        
-        // Bild verkleinern
-        const canvas = document.createElement('canvas');
-        canvas.width = 70; canvas.height = 70;
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = "#3b4c73"; 
-        ctx.fillRect(0,0,70,70);
-        ctx.font = "40px Arial";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(emoji, 35, 40);
-        currentRankedPicBase64 = canvas.toDataURL('image/jpeg', 0.5);
-        
-        document.getElementById('ranked-pic-input').value = "";
-        clearPicBtn.style.display = 'block';
-        updatePicPreview(currentRankedPicBase64);
+    presetContainers.forEach(container => {
+        if (!container) return;
+        const div = document.createElement('div');
+        div.className = 'preset-avatar';
+        div.innerText = emoji;
+        div.addEventListener('click', () => {
+            document.querySelectorAll('.preset-avatar').forEach(a => a.classList.remove('selected'));
+            document.querySelectorAll('.preset-avatar').forEach(a => {
+                if(a.innerText === emoji) a.classList.add('selected');
+            });
+
+            const canvas = document.createElement('canvas');
+            canvas.width = 70; canvas.height = 70;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = "#3b4c73"; 
+            ctx.fillRect(0,0,70,70);
+            ctx.font = "40px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(emoji, 35, 40);
+            currentRankedPicBase64 = canvas.toDataURL('image/jpeg', 0.5);
+            
+            const setupInput = document.getElementById('setup-pic-input');
+            const liveInput = document.getElementById('ranked-pic-input');
+            if(setupInput) setupInput.value = "";
+            if(liveInput) liveInput.value = "";
+            
+            const clearBtnLive = document.getElementById('clear-pic-btn');
+            const clearBtnSetup = document.getElementById('setup-clear-pic-btn');
+            if(clearBtnLive) clearBtnLive.style.display = 'block';
+            if(clearBtnSetup) clearBtnSetup.style.display = 'block';
+
+            updatePicPreviews(currentRankedPicBase64);
+        });
+        container.appendChild(div);
     });
-    presetContainer.appendChild(div);
 });
 
-// --- UI EVENT LISTENERS ---
+
+// --- UI EVENT LISTENERS ---\n
 document.getElementById('btn-expand-lb').addEventListener('click', () => {
     showLeaderboard();
     const gameOverScreen = document.getElementById('custom-game-over-screen');
@@ -72,6 +126,7 @@ liveNameInput.addEventListener('input', (e) => {
     currentRankedName = e.target.value.trim();
     if (currentRankedName !== "") {
         localStorage.setItem('lastRankedName', currentRankedName);
+        document.getElementById('ranked-name-input').value = currentRankedName; 
     }
 });
 
@@ -948,28 +1003,19 @@ function resizeImage(file, callback) {
     reader.readAsDataURL(file);
 }
 
-// Löschen-Button für Profilbild aktualisiert auch die Live-Vorschau
-clearPicBtn.addEventListener('click', () => {
-    currentRankedPicBase64 = "";
-    document.getElementById('ranked-pic-input').value = "";
-    document.querySelectorAll('.preset-avatar').forEach(a => a.classList.remove('selected'));
-    clearPicBtn.style.display = 'none';
-    updatePicPreview("");
+
+// Event Listener für Start aus dem Menü (blendet das "X" ein)
+document.getElementById('close-ranked-setup').addEventListener('click', () => {
+    rankedSetupScreen.classList.add('hidden');
 });
 
-// Bildupload aktualisiert auch die Live-Vorschau
-document.getElementById('ranked-pic-input').addEventListener('change', function(e) {
-    document.querySelectorAll('.preset-avatar').forEach(a => a.classList.remove('selected'));
-    const file = e.target.files[0];
-    if (file) {
-        resizeImage(file, function(resizedBase64) {
-            currentRankedPicBase64 = resizedBase64;
-            clearPicBtn.style.display = 'block'; 
-            updatePicPreview(currentRankedPicBase64);
-        });
-    }
+btnStartRangliste.addEventListener('click', () => {
+    document.getElementById('close-ranked-setup').style.display = 'flex';
+    rankedSetupScreen.classList.remove('hidden');
+    document.getElementById('ranked-name-input').value = localStorage.getItem('lastRankedName') || "";
 });
 
+// Event Listener für "Los geht's"
 document.getElementById('btn-start-ranked-game').addEventListener('click', () => {
     const nameInput = document.getElementById('ranked-name-input').value.trim();
     if (nameInput === "") {
@@ -980,6 +1026,7 @@ document.getElementById('btn-start-ranked-game').addEventListener('click', () =>
     currentRankedName = nameInput;
     localStorage.setItem('lastRankedName', currentRankedName);
     isRankedMode = true;
+    liveNameInput.value = currentRankedName; // Aktualisiert das Live Leaderboard Feld
     
     rankedSetupScreen.classList.add('hidden');
     startGameRoutine();
@@ -1218,7 +1265,7 @@ document.querySelector('.top-right-icon').addEventListener('click', startGameRou
 
 renderBoard();
 
-// --- BOOT-VERHALTEN: STARTET DIREKT IN DEM SETUP ---
+// --- BOOT-VERHALTEN: STARTET DIREKT IN DEM VOLLSTÄNDIGEN SETUP ---
 document.getElementById('ice-start-screen').classList.add('hidden');
 document.getElementById('leaderboard-screen').classList.add('hidden'); 
 document.getElementById('ranked-setup-screen').classList.remove('hidden');
