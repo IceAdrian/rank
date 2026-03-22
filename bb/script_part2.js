@@ -836,7 +836,7 @@ function prefillOriginal() {
 
 function startGameRoutine() {
     SoundEngine.init();
-    hasFlown67 = false;
+   
     if (document.getElementById('toggle-bgm').checked) bgmAudio.play().catch(() => {});
     
     if (scoreAnimationId) cancelAnimationFrame(scoreAnimationId);
