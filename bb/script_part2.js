@@ -3,6 +3,21 @@
 // ==========================================
 
 // --- RANGELISTE SETUP (Avatare) ---
+function updatePicPreview(base64) {
+    const preview = document.getElementById('ranked-pic-preview');
+    if (base64) {
+        preview.innerHTML = `<img src="${base64}" style="width: 100%; height: 100%; object-fit: cover;">`;
+        preview.style.borderColor = '#68cd56';
+    } else {
+        preview.innerHTML = '👤';
+        preview.style.borderColor = '#a9b7d6';
+    }
+}
+
+document.getElementById('ranked-pic-preview').addEventListener('click', () => {
+    document.getElementById('clear-pic-btn').click();
+});
+
 emojisAvatars.forEach(emoji => {
     const div = document.createElement('div');
     div.className = 'preset-avatar';
@@ -11,7 +26,6 @@ emojisAvatars.forEach(emoji => {
         document.querySelectorAll('.preset-avatar').forEach(a => a.classList.remove('selected'));
         div.classList.add('selected');
         
-        // Bild verkleinern
         const canvas = document.createElement('canvas');
         canvas.width = 70; canvas.height = 70;
         const ctx = canvas.getContext('2d');
@@ -25,6 +39,7 @@ emojisAvatars.forEach(emoji => {
         
         document.getElementById('ranked-pic-input').value = "";
         clearPicBtn.style.display = 'block';
+        updatePicPreview(currentRankedPicBase64);
     });
     presetContainer.appendChild(div);
 });
@@ -928,6 +943,7 @@ function resizeImage(file, callback) {
 }
 
 btnStartRangliste.addEventListener('click', () => {
+    document.getElementById('close-ranked-setup').style.display = 'flex'; // NEU: Zeigt das X an
     rankedSetupScreen.classList.remove('hidden');
     document.getElementById('ranked-name-input').value = localStorage.getItem('lastRankedName') || "";
 });
@@ -937,6 +953,7 @@ clearPicBtn.addEventListener('click', () => {
     document.getElementById('ranked-pic-input').value = "";
     document.querySelectorAll('.preset-avatar').forEach(a => a.classList.remove('selected'));
     clearPicBtn.style.display = 'none';
+    updatePicPreview(""); // NEU: Aktualisiert die Vorschau
 });
 
 document.getElementById('ranked-pic-input').addEventListener('change', function(e) {
@@ -946,6 +963,7 @@ document.getElementById('ranked-pic-input').addEventListener('change', function(
         resizeImage(file, function(resizedBase64) {
             currentRankedPicBase64 = resizedBase64;
             clearPicBtn.style.display = 'block'; 
+            updatePicPreview(currentRankedPicBase64); // NEU: Aktualisiert die Vorschau
         });
     }
 });
@@ -1200,18 +1218,3 @@ document.querySelector('.top-right-icon').addEventListener('click', startGameRou
 
 // Initiales Aufrufen beim Laden der Seite
 renderBoard();
-
-// --- NEU: Button-Funktion für die permanente Ranking-Taste (Weiterleitung zur Hauptseite) ---
-document.getElementById('btn-back-to-ranking').addEventListener('click', () => {
-    window.location.href = '../index.html';
-});
-
-// --- NEU: Direkt im Ranglisten-Setup (Namenseingabe) starten ---
-// 1. Versteckt den normalen Startbildschirm
-document.getElementById('ice-start-screen').classList.add('hidden');
-// 2. Versteckt die Top-Spieler-Liste zur Sicherheit
-document.getElementById('leaderboard-screen').classList.add('hidden'); 
-// 3. Zeigt den Setup-Screen für Namen und Profilbild
-document.getElementById('ranked-setup-screen').classList.remove('hidden');
-// 4. Lädt den zuletzt genutzten Namen direkt in das Eingabefeld
-document.getElementById('ranked-name-input').value = localStorage.getItem('lastRankedName') || "";
