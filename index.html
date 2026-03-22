@@ -2,1220 +2,338 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lehrerranking MPG</title>
-    <style>
-        /* Modernes Basis-Design */
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%); 
-            color: #333;
-            text-align: center; 
-            margin: 0; 
-            padding: 20px; 
-            padding-bottom: 60vh; 
-            min-height: 100vh;
-            transition: background 0.3s, color 0.3s;
-        }
-        
-        .container { 
-            max-width: 1500px; 
-            width: 96%;
-            background: white; 
-            margin: auto; 
-            padding: 30px; 
-            border-radius: 20px; 
-            box-shadow: 0 10px 40px rgba(0,0,0,0.08); 
-            position: relative;
-            transition: background 0.3s, box-shadow 0.3s;
-        }
-
-        #mpg-blast-link {
-            position: absolute; top: 20px; left: 20px; text-decoration: none; font-weight: bold;
-            background: linear-gradient(135deg, #ff416c, #ff4b2b); color: white;
-            padding: 10px 18px; border-radius: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.3s, box-shadow 0.3s; z-index: 100;
-        }
-        #mpg-blast-link:hover { transform: scale(1.05); box-shadow: 0 6px 15px rgba(255, 65, 108, 0.3); }
-
-        #dark-mode-toggle {
-            position: absolute; top: 20px; right: 20px; border-radius: 50%; 
-            width: 45px; height: 45px; border: none; background: #eaedf0; 
-            font-size: 22px; cursor: pointer; transition: all 0.3s; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex;
-            align-items: center; justify-content: center; z-index: 100;
-        }
-        #dark-mode-toggle:hover { transform: scale(1.1); }
-        
-        h2 { color: #2c3e50; font-size: 28px; margin-bottom: 20px; margin-top: 10px; transition: color 0.3s;}
-
-        /* Bewerter-Profil direkte Auswahl */
-        .profile-section {
-            background: #f8f9fa;
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 30px;
-            border: 2px dashed #eaedf0;
-            transition: all 0.3s;
-        }
-
-        .profile-title { font-weight: 800; color: #6c757d; margin-bottom: 10px; font-size: 15px; text-transform: uppercase; letter-spacing: 1px; }
-        
-        .profile-group { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 15px; }
-        .profile-group:last-child { margin-bottom: 0; }
-
-        .profile-btn {
-            padding: 10px 18px;
-            font-size: 15px;
-            font-weight: bold;
-            color: #495057;
-            background: #fff;
-            border: 2px solid #ced4da;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .profile-btn:hover { border-color: #adb5bd; transform: translateY(-2px); }
-        .profile-btn.active {
-            background: #007bff; color: white; border-color: #007bff;
-            box-shadow: 0 4px 10px rgba(0,123,255,0.2);
-        }
-
-        /* Suchleiste mit X */
-        .search-wrapper { position: relative; max-width: 400px; margin: 0 auto 25px auto; }
-        #search-input {
-            width: 100%; padding: 14px 40px 14px 20px; font-size: 16px; box-sizing: border-box;
-            border: 2px solid #eaedf0; border-radius: 30px; outline: none;
-            transition: all 0.3s ease; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
-        }
-        #search-input:focus { border-color: #007bff; box-shadow: 0 0 15px rgba(0,123,255,0.15); }
-        #clear-search {
-            position: absolute; right: 15px; top: 50%; transform: translateY(-50%);
-            font-size: 20px; color: #adb5bd; cursor: pointer; display: none;
-            transition: color 0.2s; user-select: none;
-        }
-        #clear-search:hover { color: #dc3545; }
-
-        /* Auswahl-Bereich */
-        #selection-section { display: block; }
-        .controls { margin-bottom: 25px; display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; }
-        
-        .teacher-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; text-align: left; margin-bottom: 30px; }
-        .teacher-item { padding: 12px 10px; border-radius: 12px; border: 2px solid transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s, border-color 0.3s; user-select: none; position: relative; -webkit-tap-highlight-color: transparent; }
-        .teacher-item.male { background: #f0f7ff; border-color: #d6e8ff; }
-        .teacher-item.female { background: #fff0f5; border-color: #ffd6e6; }
-        @media (hover: hover) { .teacher-item:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.05); } }
-        .teacher-item.male.selected { border-color: #007bff; background: #e0f0ff; box-shadow: 0 4px 12px rgba(0,123,255,0.2); }
-        .teacher-item.female.selected { border-color: #e83e8c; background: #ffe6f0; box-shadow: 0 4px 12px rgba(232,62,140,0.2); }
-        .teacher-item input[type="checkbox"] { display: none; }
-        .teacher-prefix { font-size: 11px; color: #6c757d; text-transform: uppercase; letter-spacing: 1px; }
-        .teacher-lastname { font-size: 15px; font-weight: 800; color: #2c3e50; text-align: center; word-break: break-word; transition: color 0.3s; }
-
-        /* Ranking-Bereich */
-        #ranking-section { display: none; margin-top: 40px; padding-top: 30px; border-top: 2px dashed #eaedf0; transition: border-color 0.3s; }
-        
-        .progress-container { width: 100%; max-width: 600px; height: 16px; background: #eaedf0; border-radius: 8px; margin: 0 auto 25px auto; overflow: hidden; box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); transition: background 0.3s; }
-        .progress-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #28a745, #34ce57); transition: width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); border-radius: 8px; }
-
-        .battle-arena { display: flex; justify-content: center; align-items: stretch; gap: 35px; margin-top: 20px; opacity: 1; transition: opacity 0.3s ease; }
-        .card { width: 45%; max-width: 450px; background: #fff; border: 2px solid #f8f9fa; border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); display: flex; flex-direction: column; justify-content: space-between; transition: all 0.3s; }
-        .big-name-display { height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 16px; margin-bottom: 25px; border: 2px solid transparent; padding: 15px; transition: transform 0.2s ease, background 0.3s, border-color 0.3s; }
-        .big-name-display.male { background: linear-gradient(135deg, #f0f7ff, #e0f0ff); border-color: #b8d4ff; }
-        .big-name-display.female { background: linear-gradient(135deg, #fff0f5, #ffe6f0); border-color: #ffb8d4; }
-        .big-name-display .prefix { font-size: 16px; color: #6c757d; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px; }
-        .big-name-display .last-name { font-size: 34px; font-weight: 900; color: #2c3e50; text-align: center; word-break: break-word; line-height: 1.1; transition: color 0.3s; }
-        .big-name-display.male .last-name { color: #0056b3; }
-        .big-name-display.female .last-name { color: #c2185b; }
-        .flash-green { box-shadow: 0 0 35px rgba(40, 167, 69, 0.4) !important; transform: scale(1.03); border-color: #28a745 !important; }
-        .vs { font-size: 28px; font-weight: 900; color: #adb5bd; display: flex; align-items: center; padding: 0 10px; transition: color 0.3s;}
-        
-        button { padding: 12px 24px; font-size: 15px; font-weight: bold; cursor: pointer; border: none; border-radius: 12px; transition: all 0.2s ease; outline: none; box-shadow: 0 4px 6px rgba(0,0,0,0.05); -webkit-tap-highlight-color: transparent; }
-        @media (hover: hover) { button:hover { transform: translateY(-2px); } }
-        .btn-vote { background: linear-gradient(135deg, #007bff, #0056b3); color: white; width: 100%; padding: 18px; font-size: 20px; margin-top: auto; border-radius: 14px; }
-        @media (hover: hover) { .btn-vote:hover { box-shadow: 0 6px 15px rgba(0,123,255,0.3); } }
-        .btn-secondary { background: linear-gradient(135deg, #6c757d, #5a6268); color: white; }
-        .btn-info { background: linear-gradient(135deg, #17a2b8, #117a8b); color: white; }
-        .btn-warning { background: linear-gradient(135deg, #ffc107, #e0a800); color: #333; }
-        .btn-success { background: linear-gradient(135deg, #28a745, #1e7e34); color: white; }
-        @media (hover: hover) { .btn-success:hover { box-shadow: 0 6px 15px rgba(40,167,69,0.3); } }
-        .btn-danger { background: linear-gradient(135deg, #dc3545, #c82333); color: white; }
-        
-        .action-buttons { margin-top: 35px; display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; }
-        .action-buttons button { padding: 15px 25px; font-size: 16px; }
-
-        /* Ergebnisse Layout */
-        #results-screen { display: none; }
-        .results-wrapper { display: flex; gap: 40px; align-items: flex-start; margin-top: 20px; text-align: left; }
-        @media (max-width: 1050px) {
-            .results-wrapper { flex-direction: column; }
-            .battle-arena { flex-direction: column; align-items: center; }
-            .card { width: 100%; max-width: 100%; }
-            .top10-sidebar { width: 100%; flex: auto; }
-        }
-
-        /* Top 10 Sidebar modernisiert */
-        .top10-sidebar {
-            flex: 0 0 450px; background: #fffdf5; border: 4px solid #ffd700; 
-            border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(255, 215, 0, 0.15); box-sizing: border-box; transition: all 0.3s;
-        }
-        .top10-sidebar h3 { color: #b8860b; margin-top: 0; border-bottom: 2px solid #fdeaa8; padding-bottom: 15px; text-align: center; font-size: 22px; transition: all 0.3s;}
-        
-        .top10-list { list-style: none; padding: 0; margin: 0; }
-        .top10-list li {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 14px 15px; border: 1px solid #eaedf0; gap: 10px; font-weight: bold;
-            border-radius: 12px; margin-bottom: 10px; background: #ffffff; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.02); transition: all 0.3s;
-        }
-        .top10-list li:last-child { margin-bottom: 0; }
-        
-        .top10-list li.rank-1 { border: 2px solid #ffd700; background: linear-gradient(135deg, #fffcf0, #ffffff); margin-bottom: 20px; padding: 18px 15px; transform: scale(1.02); box-shadow: 0 6px 15px rgba(255, 215, 0, 0.2); }
-        .top10-list li.rank-2 { border-left: 5px solid #c0c0c0; margin-bottom: 15px; }
-        .top10-list li.rank-3 { border-left: 5px solid #cd7f32; margin-bottom: 20px; }
-
-        .top10-list .rank { font-size: 16px; width: 45px; text-align: left; color: #b8860b; }
-        .top10-list li.rank-1 .rank { font-size: 22px; } 
-        .top10-list .name { flex-grow: 1; font-size: 16px; transition: color 0.3s;}
-        .top10-list li.rank-1 .name { font-size: 18px; color: #855a00; }
-        
-        .top10-list .stats { display: flex; gap: 8px; font-size: 14px; padding: 5px 0; align-items: center;}
-        .stat-wins { display: inline-block; width: 45px; text-align: left; color: #28a745; }
-        .stat-losses { display: inline-block; width: 45px; text-align: left; color: #dc3545; }
-        .stat-quote { display: inline-block; width: 45px; text-align: right; color: #2c3e50; font-weight: 900; }
-
-        /* HAUPTTABELLE */
-        .full-list-main {
-            flex: 1; background: #fff; border: 1px solid #eaedf0; border-radius: 16px;
-            padding: 25px; width: 100%; box-sizing: border-box; box-shadow: 0 4px 15px rgba(0,0,0,0.03); overflow-x: auto;
-            transition: all 0.3s ease;
-        }
-
-        .all-time-glow {
-            border: 3px solid #ffd700 !important;
-            background: linear-gradient(180deg, #fffdf5 0%, #ffffff 100%) !important;
-            animation: subtleGlow 2.5s infinite alternate;
-        }
-        @keyframes subtleGlow {
-            from { box-shadow: 0 0 15px rgba(255, 215, 0, 0.15); }
-            to { box-shadow: 0 0 35px rgba(255, 215, 0, 0.35); }
-        }
-        
-        .results-table { width: 100%; border-collapse: separate; border-spacing: 0 6px; margin-top: 10px; table-layout: fixed; }
-        
-        .results-table th, .results-table td {
-            box-sizing: border-box; padding: 14px 8px; text-align: center; vertical-align: middle; 
-            overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: background 0.3s, color 0.3s, border-color 0.3s;
-        }
-        
-        .results-table th { 
-            background: #f8f9fa; color: #6c757d; font-size: 14px; font-weight: bold;
-            border-top: 1px solid #eaedf0; border-bottom: 1px solid #eaedf0; cursor: default; 
-        }
-        
-        .results-table th.sortable { cursor: pointer; }
-        .results-table th.sortable:not(.active-sort):hover { background: #e9ecef; color: #333; }
-        
-        .results-table th.active-sort { background: #e0f0ff; color: #007bff; font-weight: 900; border-color: #b8daff;}
-        .results-table th.active-sort:hover { background: #e0f0ff; color: #007bff; }
-        .results-table th.active-sort.desc::after { content: ' ↓'; font-size: 14px; } 
-        .results-table th.active-sort.asc::after { content: ' ↑'; font-size: 14px; } 
-
-        .results-table th.name-header { text-align: left; padding-left: 15px; }
-        .results-table th:first-child { border-left: 1px solid #eaedf0; border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
-        .results-table th:last-child { border-right: 1px solid #eaedf0; border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
-        
-        .results-table td { 
-            background: #ffffff; border-top: 1px solid #eaedf0; border-bottom: 1px solid #eaedf0; 
-            font-size: 16px; font-weight: 600; color: #2c3e50; 
-        }
-        .results-table td.name-col { text-align: left; padding-left: 15px; font-size: 17px; } 
-        
-        .results-table td:first-child { border-left: 1px solid #eaedf0; border-top-left-radius: 10px; border-bottom-left-radius: 10px; font-weight: bold; color: #6c757d;}
-        .results-table td:last-child { border-right: 1px solid #eaedf0; border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
-        
-        .results-table tbody tr { transition: transform 0.2s ease, box-shadow 0.2s ease; }
-        .results-table tbody tr:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.06); position: relative; z-index: 10; }
-        
-        .results-table tr.rank-row-1 td { background: #fffcf0; border-color: #fdeaa8; }
-        .results-table tr.rank-row-1 td:first-child { border-left: 6px solid #ffd700; }
-        .results-table tr.rank-row-1 td.name-col { color: #b8860b; font-weight: 900; font-size: 19px; }
-
-        .results-table tr.rank-row-2 td { background: #f8f9fa; border-color: #e9ecef; }
-        .results-table tr.rank-row-2 td:first-child { border-left: 6px solid #c0c0c0; }
-
-        .results-table tr.rank-row-3 td { background: #fffaf6; border-color: #fcece0; }
-        .results-table tr.rank-row-3 td:first-child { border-left: 6px solid #cd7f32; }
-
-        .score-positive { color: #28a745; } .score-negative { color: #dc3545; } .score-neutral { color: #6c757d; }
-
-        @media (max-width: 768px) {
-            .results-table th, .results-table td { padding: 12px 4px; font-size: 13px; }
-            .results-table td.name-col { font-size: 14px; padding-left: 8px;}
-            .results-table tr.rank-row-1 td.name-col { font-size: 15px; }
-            .hide-mobile { display: none; } 
-        }
-
-        /* Admin Bereich */
-        #admin-screen { display: none; text-align: left; }
-        .admin-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; margin-bottom: 30px; max-height: 50vh; overflow-y: auto; padding-right: 10px; }
-        .admin-item { background: #f8f9fa; padding: 15px; border-radius: 12px; display: flex; flex-direction: column; gap: 8px; border: 1px solid #dee2e6; transition: background 0.3s, border-color 0.3s;}
-        .admin-item input[type="text"], .admin-item input[type="number"] { padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; outline: none; transition: background 0.3s, color 0.3s, border-color 0.3s;}
-        .admin-item input[type="text"] { width: calc(100% - 22px); }
-        .admin-item input[type="number"] { padding: 8px; width: 100%; box-sizing: border-box; }
-        .secret-trigger { cursor: text; }
-        .info-trigger { cursor: pointer; user-select: none; }
-
-        .history-list { margin-top: 20px; max-height: 500px; overflow-y: auto; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 12px; padding: 15px; transition: background 0.3s, border-color 0.3s;}
-        .history-item { padding: 15px 10px; border-bottom: 1px solid #dee2e6; font-size: 14px; transition: border-color 0.3s;}
-        .history-item:last-child { border-bottom: none; }
-        .history-date { color: #007bff; font-weight: bold; }
-
-        /* --- DARK MODE STYLES (GOLD & GLOW EDITION) --- */
-        body.dark-mode { background: #121212; color: #e0e0e0; }
-        body.dark-mode .container { background: #1e1e1e; box-shadow: 0 10px 50px rgba(0,0,0,0.8); }
-        body.dark-mode h2, body.dark-mode h3 { color: #f8f9fa; }
-        body.dark-mode .profile-section { background: #242424; border-color: #444; }
-        body.dark-mode .profile-title { color: #adb5bd; }
-        body.dark-mode .profile-btn { background: #2c2c2c; color: #e0e0e0; border-color: #555; }
-        body.dark-mode .profile-btn:hover { border-color: #888; }
-        body.dark-mode .profile-btn.active { background: #007bff; color: white; border-color: #007bff; box-shadow: 0 0 15px rgba(0,123,255,0.4); }
-        body.dark-mode #search-input { background: #2c2c2c; color: #e0e0e0; border-color: #444; }
-        body.dark-mode #search-input:focus { border-color: #ffd700; box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); }
-        body.dark-mode #mpg-blast-link { box-shadow: 0 4px 10px rgba(0,0,0,0.5); border: 1px solid #ff4b2b;}
-        
-        /* Lehrer Auswahl - Gold Glow */
-        body.dark-mode .teacher-item.male { background: #1c2b3a; border-color: #2a3f54; }
-        body.dark-mode .teacher-item.female { background: #3a1c27; border-color: #542a3a; }
-        body.dark-mode .teacher-lastname { color: #f8f9fa; }
-        
-        body.dark-mode .teacher-item.male.selected,
-        body.dark-mode .teacher-item.female.selected { 
-            background: rgba(255, 215, 0, 0.1); 
-            border-color: #ffd700; 
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); 
-            transform: translateY(-2px);
-        }
-
-        body.dark-mode .progress-container { background: #333; }
-        body.dark-mode .progress-bar-fill { background: linear-gradient(90deg, #b8860b, #ffd700); box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
-        
-        /* Duell Arena - Gold Hover & Vote */
-        body.dark-mode .card { background: #242424; border-color: #333; transition: all 0.3s ease; }
-        body.dark-mode .card:hover { box-shadow: 0 0 25px rgba(255, 215, 0, 0.2); border-color: rgba(255, 215, 0, 0.4); transform: translateY(-4px); }
-        
-        body.dark-mode .big-name-display.male { background: linear-gradient(135deg, #1c2b3a, #244163); border-color: #2a3f54; }
-        body.dark-mode .big-name-display.female { background: linear-gradient(135deg, #3a1c27, #63243d); border-color: #542a3a; }
-        body.dark-mode .big-name-display .last-name { color: #f8f9fa; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-        body.dark-mode .big-name-display.male .last-name { color: #8cb4f5; }
-        body.dark-mode .big-name-display.female .last-name { color: #f58cb4; }
-        
-        body.dark-mode .vs { color: #666; text-shadow: 0 0 10px rgba(255,255,255,0.1); }
-        
-        /* Goldener Vote-Button in Dark Mode */
-        body.dark-mode .btn-vote { 
-            background: linear-gradient(135deg, #3a321a, #2a2412); 
-            color: #ffd700; 
-            border: 1px solid #b8860b; 
-            box-shadow: inset 0 0 10px rgba(255,215,0,0.1);
-            transition: all 0.3s;
-        }
-        body.dark-mode .btn-vote:hover { 
-            background: linear-gradient(135deg, #ffd700, #ffb300); 
-            color: #121212; 
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); 
-            border-color: #fff;
-        }
-
-        /* Goldener Blitz beim Abstimmen */
-        body.dark-mode .flash-green { 
-            box-shadow: 0 0 40px rgba(255, 215, 0, 0.7) !important; 
-            border-color: #ffd700 !important; 
-            transform: scale(1.05);
-            background: rgba(255, 215, 0, 0.05);
-        }
-        
-        /* Ergebnisse in Gold */
-        body.dark-mode .top10-sidebar { background: #2a281e; border-color: #ffd700; box-shadow: 0 0 20px rgba(255, 215, 0, 0.15); }
-        body.dark-mode .top10-sidebar h3 { color: #ffd700; border-bottom-color: #665500; text-shadow: 0 0 10px rgba(255,215,0,0.3); }
-        body.dark-mode .top10-list li { background: #2c2c2c; border-color: #444; color: #e0e0e0; }
-        body.dark-mode .top10-list li.rank-1 { background: linear-gradient(135deg, #3a321a, #2a2412); border-color: #ffd700; box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); }
-        body.dark-mode .top10-list .name { color: #e0e0e0; }
-        body.dark-mode .top10-list li.rank-1 .name { color: #ffd700; text-shadow: 0 0 5px rgba(255,215,0,0.4); }
-        
-        body.dark-mode .full-list-main { background: #1e1e1e; border-color: #444; }
-        
-        body.dark-mode .all-time-glow {
-            border: 3px solid #ffd700 !important;
-            background: #1e1e1e !important;
-            animation: darkGoldGlow 2.5s infinite alternate;
-        }
-        @keyframes darkGoldGlow {
-            from { box-shadow: 0 0 10px rgba(255, 215, 0, 0.1); }
-            to { box-shadow: 0 0 30px rgba(255, 215, 0, 0.4); }
-        }
-
-        body.dark-mode .results-table th { background: #2c2c2c; color: #adb5bd; border-color: #444; }
-        body.dark-mode .results-table th.sortable:not(.active-sort):hover { background: #3a3a3a; color: #fff; }
-        body.dark-mode .results-table td { background: #242424; color: #e0e0e0; border-color: #444; }
-        body.dark-mode .results-table td.name-col { color: #e0e0e0; }
-        body.dark-mode .results-table th.active-sort { background: #2a2412; color: #ffd700; border-color: #b8860b; }
-        body.dark-mode .results-table th.active-sort:hover { background: #2a2412; }
-        
-        body.dark-mode .results-table tr.rank-row-1 td { background: #2a281e; border-color: #665500; }
-        body.dark-mode .results-table tr.rank-row-1 td.name-col { color: #ffd700; text-shadow: 0 0 5px rgba(255,215,0,0.4); }
-        body.dark-mode .results-table tr.rank-row-2 td { background: #242424; border-color: #444; }
-        body.dark-mode .results-table tr.rank-row-3 td { background: #28211a; border-color: #553311; }
-        
-        body.dark-mode .admin-item { background: #2c2c2c; border-color: #444; }
-        body.dark-mode .admin-item input { background: #333; border-color: #555; color: #e0e0e0; }
-        body.dark-mode .history-list { background: #2c2c2c; border-color: #444; }
-        body.dark-mode .history-item { border-color: #444; }
-        body.dark-mode #dark-mode-toggle { background: #2c2c2c; color: #fff; border: 1px solid #555; }
-        
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ice Blast - Adventure Master</title>
+    
+    <link rel="stylesheet" href="style_part1.css">
+    <link rel="stylesheet" href="style_part2.css">
 </head>
 <body>
 
-<a href="bb/bb.html" id="mpg-blast-link" title="Zu MPG Blast wechseln">🚀 MPG Blast</a>
-<button id="dark-mode-toggle" onclick="toggleDarkMode()" title="Dark Mode umschalten">🌙</button>
+    <div id="live-leaderboard" class="hidden">
+        <input type="text" id="live-name-input" class="live-name-input" placeholder="Dein Name" title="Name ändern">
+        <div class="live-lb-header">
+            <div class="live-lb-title">🏆 Rangliste</div>
+            <div class="expand-lb-icon" id="btn-expand-lb" title="Rangliste vergrößern">⤢</div>
+        </div>
+        <div id="live-lb-list"></div>
+    </div>
 
-<div class="container">
-    <div id="main-view">
-        <div class="profile-section">
-            <div class="profile-title">Wer bewertet hier?</div>
-            <div class="profile-group" id="grade-group">
-                <div class="profile-btn" data-type="grade" data-val="5">5. Klasse</div>
-                <div class="profile-btn" data-type="grade" data-val="6">6. Klasse</div>
-                <div class="profile-btn" data-type="grade" data-val="7">7. Klasse</div>
-                <div class="profile-btn" data-type="grade" data-val="8">8. Klasse</div>
-                <div class="profile-btn" data-type="grade" data-val="9">9. Klasse</div>
-                <div class="profile-btn" data-type="grade" data-val="10">10. Klasse</div>
-                <div class="profile-btn" data-type="grade" data-val="11">11. Klasse</div>
-                <div class="profile-btn" data-type="grade" data-val="12">12. Klasse</div>
+    <div id="ice-start-screen" class="ice-start-screen">
+        <div class="logo-container">
+            <div class="logo-ice">
+                <span class="logo-crown">👑</span>
+                ICE
             </div>
-            <div class="profile-group" id="gender-group">
-                <div class="profile-btn" data-type="gender" data-val="Männlich">Männlich 👨</div>
-                <div class="profile-btn" data-type="gender" data-val="Weiblich">Weiblich 👩</div>
+            <div class="logo-blast">
+                <span class="letter-B">B</span>
+                <span class="letter-L">L</span>
+                <span class="letter-A">A</span>
+                <span class="letter-S">S</span>
+                <span class="letter-T">T</span>
             </div>
+            <div class="logo-sub">ADVENTURE MASTER</div>
         </div>
 
-        <div id="selection-section">
-            <h2><span id="trigger-welche" class="secret-trigger">Welche</span> <span id="trigger-lehrer" class="secret-trigger">Lehrer</span> möchtest du bewerten?</h2>
-            
-            <div class="search-wrapper">
-                <input type="text" id="search-input" placeholder="🔍 Nach Name suchen..." oninput="filterTeachers()">
-                <span id="clear-search" onclick="clearSearch()" title="Suche löschen">✖</span>
-            </div>
-
-            <div class="controls">
-                <button class="btn-secondary" onclick="selectAll(true)">Alle auswählen</button>
-                <button class="btn-secondary" onclick="selectAll(false)">Alle abwählen</button>
-                <button class="btn-info" onclick="showAllTimeOnly()">🏆 All-Time Ranking ansehen</button>
-            </div>
-            
-            <div class="teacher-grid" id="teacher-grid"></div>
+        <div class="start-buttons-wrapper">
+            <button class="btn-menu btn-rangliste" id="btn-start-rangliste">
+                🏆 Rangliste
+                <span class="badge-dot"></span>
+            </button>
+            <button class="btn-menu btn-classic" id="btn-start-classic">
+                ♾️ Classic
+            </button>
         </div>
+    </div>
 
-        <div id="ranking-section">
-            <h2>Wer ist besser<span id="trigger-stats" class="info-trigger">?</span></h2>
-            
-            <div id="duel-stats" style="display: none; color: #007bff; font-weight: bold; font-size: 15px; margin-top: -10px; margin-bottom: 10px;">
-                📊 Absolviert: <span id="stat-done">0</span> | Logisch noch übrig: <span id="stat-left">0</span>
+    <div class="header">
+        <div class="highscore" id="highscore-display">👑 0</div>
+        <div class="settings-icon" id="settings-btn">⚙️</div>
+    </div>
+
+    <div class="current-score-wrapper">
+        <div class="combo-display hidden" id="combo-display">
+            <span class="heart-icon">❤️</span>
+        </div>
+        <div class="current-score" id="current-score-display">0</div>
+    </div>
+
+    <div class="board-wrapper">
+        <div id="sweep-overlay" class="sweep-overlay"></div>
+        <div class="board" id="board"></div>
+    </div>
+
+    <div class="tray" id="tray">
+        <div class="shape-slot"><div class="shape-container"></div></div>
+        <div class="shape-slot"><div class="shape-container"></div></div>
+        <div class="shape-slot"><div class="shape-container"></div></div>
+    </div>
+
+    <div id="settings-modal" class="settings-overlay hidden">
+        <div class="settings-content">
+            <div class="settings-header">
+                <span>Settings</span>
+                <span class="close-settings" id="close-settings">✕</span>
             </div>
-
-            <div class="progress-container" id="progress-container">
-                <div class="progress-bar-fill" id="progress-bar-fill"></div>
-            </div>
-
-            <div id="all-done-msg" style="display: none; color: #28a745; font-size: 20px; font-weight: bold; margin: 30px 0;">
-                🎉 Alle Kombinationen wurden bewertet! Weiterleitung läuft... 🎉
-            </div>
-
-            <div class="battle-arena" id="arena">
-                <div class="card" id="card-a">
-                    <div class="big-name-display" id="display-a">
-                        <div class="prefix" id="prefix-a">Herr</div>
-                        <div class="last-name" id="lastname-a">Mustermann</div>
-                    </div>
-                    <button class="btn-vote" id="btn-a" onclick="vote('A')">Wählen</button>
+           
+            <div class="setting-item">
+                <div class="setting-left">
+                    <span class="icon">
+                        <svg viewBox="0 0 24 24" fill="white" width="28" height="28"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                    </span> 
+                    <span>Sound</span>
                 </div>
-                
-                <div class="vs">VS</div>
-                
-                <div class="card" id="card-b">
-                    <div class="big-name-display" id="display-b">
-                        <div class="prefix" id="prefix-b">Frau</div>
-                        <div class="last-name" id="lastname-b">Musterfrau</div>
-                    </div>
-                    <button class="btn-vote" id="btn-b" onclick="vote('B')">Wählen</button>
+                <label class="switch"><input type="checkbox" id="toggle-sound"><span class="slider"></span></label>
+            </div>
+
+            <div class="setting-item">
+                <div class="setting-left">
+                    <span class="icon">
+                        <svg viewBox="0 0 24 24" fill="white" width="28" height="28"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                    </span> 
+                    <span>BGM</span>
                 </div>
+                <label class="switch"><input type="checkbox" id="toggle-bgm"><span class="slider"></span></label>
+             </div>
+
+            <div class="setting-item">
+                <div class="setting-left">
+                    <span class="icon">
+                        <svg viewBox="0 0 24 24" fill="white" width="26" height="26"><path d="M0 15h2V9H0v6zm3 2h2V7H3v10zm19-8v6h2V9h-2zm-3 8h2V7h-2v10zM16.5 3h-9C6.67 3 6 3.67 6 4.5v15c0 .83.67 1.5 1.5 1.5h9c.83 0 1.5-.67 1.5-1.5v-15c0-.83-.67-1.5-1.5-1.5zM16 19H8V5h8v14z"/></svg>
+                    </span> 
+                    <span>Vibration</span>
+                </div>
+                <label class="switch"><input type="checkbox" id="toggle-vibration"><span class="slider"></span></label>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-left">
+                    <span class="icon">
+                        <svg viewBox="0 0 24 24" fill="white" width="30" height="30"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                    </span> 
+                    <span>Home</span>
+                </div>
+                <button class="action-btn" id="btn-settings-home">Back</button>
             </div>
 
-            <div class="action-buttons" id="action-buttons-container">
-                <button class="btn-info" id="btn-undo" style="display: none;" onclick="undoLastVote()">↶ Rückgängig</button>
-                <button class="btn-secondary" id="btn-skip" onclick="vote('SKIP')">Überspringen</button>
-                <button class="btn-warning" id="btn-tie" onclick="vote('TIE')">Gleichwertig</button>
-                <button class="btn-success" onclick="showResults()">Aktuelles Ergebnis ansehen</button>
+            <div class="setting-item">
+                <div class="setting-left">
+                    <span class="icon">
+                        <svg viewBox="0 0 24 24" fill="white" width="28" height="28"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+                    </span> 
+                    <span>Replay</span>
+                </div>
+                <button class="action-btn" id="btn-settings-replay">Play</button>
+             </div>
+
+            <div class="setting-item">
+                <div class="setting-left">
+                    <span class="icon">
+                        <svg viewBox="0 0 24 24" fill="white" width="26" height="26"><path d="M3 11h4v10H3zm5 4h13v6H8zm0-14h13v13H8z"/></svg>
+                    </span> 
+                    <span>More Games</span>
+                </div>
+                <button class="action-btn" onclick="window.location.href='zaamore_games.html'">Start</button>
+             </div>
+
+            <div class="setting-item">
+                <div class="setting-left">
+                    <span class="icon">
+                        <svg viewBox="0 0 24 24" fill="white" width="28" height="28"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+                    </span> 
+                    <span>More Settings</span>
+                </div>
+                <button class="action-btn" id="btn-open-master">Set</button>
             </div>
         </div>
     </div>
 
-    <div id="admin-screen">
-        <h2 style="text-align: center;">Admin Bereich 🛠️</h2>
-        <div style="text-align: center; margin-bottom: 25px;">
-            <button class="btn-danger" onclick="resetAllTimeStats()">⚠️ Gesamte All-Time Statistik auf 0 zurücksetzen</button>
-        </div>
-        
-        <h3 style="border-bottom: 2px solid #eaedf0; padding-bottom: 10px;">Lehrer Daten bearbeiten</h3>
-        <div class="admin-grid" id="admin-grid"></div>
-        
-        <h3 style="border-bottom: 2px solid #eaedf0; padding-bottom: 10px; margin-top: 40px;">Verlauf der letzten Runden</h3>
-        <div style="text-align: right; margin-bottom: 10px;">
-            <button class="btn-secondary" onclick="clearHistory()" style="padding: 8px 15px; font-size: 14px;">🗑️ Gesamten Verlauf leeren</button>
-        </div>
-        <div class="history-list" id="history-list"></div>
+    <div id="master-settings-modal" class="master-fullscreen hidden">
+        <div class="master-fs-header" id="master-title" style="cursor: pointer;">Mastersettings</div>
+        <div class="master-fs-content">
+            
+            <div class="master-fs-item" style="flex-direction: column; align-items: stretch; gap: 10px;">
+                <div style="text-align: center;"><span>Daten Backup (Rangliste & Score)</span></div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="action-btn" id="btn-export-data" style="flex: 1; background-color: #3b82f6; box-shadow: 0 4px 0 #2563eb;">Exportieren</button>
+                    <button class="action-btn" id="btn-import-data" style="flex: 1; background-color: #fca5a5; box-shadow: 0 4px 0 #f87171; color: #7f1d1d;">Importieren</button>
+                    <input type="file" id="import-file-input" accept=".json" style="display: none;">
+                </div>
+                <div id="backup-status-msg" style="text-align: center; font-size: 14px; font-weight: bold; min-height: 20px; transition: opacity 0.3s; opacity: 0;"></div>
+            </div>
 
-        <div class="action-buttons" style="margin-top: 40px;">
-            <button class="btn-success" onclick="saveAdminChanges()">Änderungen speichern & Zurück</button>
-            <button class="btn-secondary" onclick="closeAdmin()">Abbrechen</button>
+            <div class="master-fs-item mode-selector-container">
+                <div style="width: 100%; text-align: center;"><span>Spielmodus</span></div>
+                <div class="mode-options">
+                    <div class="mode-option active" id="mode-standard">
+                        <div class="mode-preview standard-preview"></div>
+                        <span>Standard</span>
+                    </div>
+
+                    <div class="mode-option" id="mode-adrian">
+                        <div class="mode-preview color-adrian"></div>
+                        <span>Adrian Modus</span>
+                    </div>
+
+                    <div class="mode-option" id="mode-ahmad">
+                        <div class="mode-preview color-image"></div>
+                        <span>Ahmad Modus</span>
+                    </div>
+                   
+                    <div class="mode-option" id="mode-emanuel">
+                        <div class="mode-preview color-emanuel"></div>
+                        <span>Emanuel Modus</span>
+                    </div>
+                 </div>
+            </div>
+
+            <div class="master-fs-item">
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <span>Einfarbig (Standard)</span>
+                    <select id="single-color-select" style="background: #3b4c73; color: white; border: none; padding: 8px; border-radius: 8px; font-weight: bold; outline: none; width: fit-content;">
+                        <option value="color-hellblau">Hellblau</option>
+                        <option value="color-dunkelblau">Dunkelblau</option>
+                        <option value="color-gruen">Grün</option>
+                        <option value="color-gelb">Gelb</option>
+                        <option value="color-orange">Orange</option>
+                        <option value="color-rot">Rot</option>
+                        <option value="color-pink">Pink</option>
+                        <option value="color-lila">Lila</option>
+                    </select>
+                </div>
+                <label class="switch"><input type="checkbox" id="toggle-single-color"><span class="slider"></span></label>
+            </div>
+
+            <div class="master-fs-item">
+                <span>Meme bei 67</span>
+                <label class="switch"><input type="checkbox" id="toggle-meme" checked><span class="slider"></span></label>
+            </div>
+
+            <div class="master-fs-item">
+                <span>Quadratisches UI</span>
+                <label class="switch"><input type="checkbox" id="toggle-square-ui"><span class="slider"></span></label>
+            </div>
+
+            <div class="master-fs-item" id="original-mode-container">
+                <div style="display:flex; flex-direction:column; max-width: 70%;">
+                    <span>Original</span>
+                    <span style="font-size: 13px; color: #a9b7d6; font-weight: normal; margin-top: 4px; line-height: 1.3;">
+                        Füllt das Feld anfangs mit zufälligen Blöcken. Bis Score 100 erhältst du leichtere Formen zum Auflösen.
+                    </span>
+                </div>
+                <label class="switch"><input type="checkbox" id="toggle-original"><span class="slider"></span></label>
+            </div>
+        </div>
+
+        <div class="master-fs-footer">
+            <button class="btn-fs-back" id="btn-master-back">
+                <svg viewBox="0 0 24 24" fill="white" width="24" height="24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                Zurück
+            </button>
         </div>
     </div>
 
-    <div id="results-screen">
-        <h1 id="results-main-title">🏆 Lehrer Ranking 🏆</h1>
-        <div class="results-wrapper">
-            <div class="top10-sidebar" id="sidebar-container">
-                <h3>⭐ Die Top 10 der Schule ⭐</h3>
-                <ul class="top10-list" id="top10-list"></ul>
+    <div id="custom-game-over-screen" class="custom-game-over-screen hidden">
+        <div class="top-right-icon">🔄</div> 
+        <div class="cgo-title">Game Over</div>
+        <div class="cgo-label">Score</div>
+        <div class="cgo-score" id="cgo-current">0</div>
+        <div class="cgo-label">Best Score</div>
+        <div class="cgo-best" id="cgo-best">0</div>
+        <button class="cgo-play-btn" id="cgo-play-btn">
+            <svg viewBox="0 0 24 24" fill="white" width="36px" height="36px"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+    </div>
+
+    <div id="ranked-setup-screen" class="settings-overlay hidden" style="z-index: 6000;">
+        <div class="settings-content" style="display: flex; flex-direction: column; gap: 15px; align-items: center; position: relative;">
+            <div class="settings-header" style="width: 100%; position: relative; min-height: 32px; justify-content: center; display: flex;">
+                <span style="font-size: 22px; text-align: center; margin: 0;">Rangliste spielen</span>
+                <span class="close-settings" id="close-ranked-setup" style="position: absolute; right: -5px; top: -5px; transform: none;">✕</span>
             </div>
-            <div class="full-list-main" id="main-list-container">
-                <h3 id="main-list-title" style="margin-top: 0; border-bottom: 2px solid #eaedf0; padding-bottom: 15px; color: inherit; font-size: 22px;">
-                    Dein persönliches Ranking (Diese Runde)
-                </h3>
-                <table class="results-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 6%;">#</th>
-                            <th id="th-name" class="name-header sortable" style="width: 32%;" onclick="sortResults('name')">Name</th>
-                            <th id="th-wins" class="sortable" style="width: 12%;" onclick="sortResults('wins')">👍<span class="hide-mobile"> Siege</span></th>
-                            <th id="th-losses" class="sortable" style="width: 12%;" onclick="sortResults('losses')">👎<span class="hide-mobile"> Niederl.</span></th>
-                            <th style="width: 10%;">🤝<span class="hide-mobile"> Remis</span></th>
-                            <th id="th-diff" class="sortable" style="width: 12%;" onclick="sortResults('diff')">+/-<span class="hide-mobile"> Diff</span></th>
-                            <th id="th-winrate" class="sortable active-sort desc" style="width: 16%;" onclick="sortResults('winrate')">📊 Quote</th>
-                        </tr>
-                    </thead>
-                    <tbody id="full-result-list"></tbody>
-                </table>
+            
+            <input type="text" id="ranked-name-input" placeholder="Dein Spielername" style="width: 100%; padding: 12px; border-radius: 8px; border: none; background: #3b4c73; color: white; font-size: 16px; font-weight: bold; outline: none;">
+            
+            <div style="width: 100%; margin-top: 5px;">
+                <span style="color: #a9b7d6; font-size: 14px;">Vorgefertigte Bilder:</span>
+                <div id="preset-avatars" style="display: flex; gap: 8px; justify-content: center; margin-top: 8px; flex-wrap: wrap;">
+                    </div>
             </div>
-        </div>
-        <div style="margin-top: 40px;">
-            <button class="btn-success" style="padding: 15px 40px; font-size: 18px;" onclick="location.reload()">Zurück zur Startseite</button>
+            
+            <div style="width: 100%; text-align: center; color: #a9b7d6; font-size: 12px; margin: 5px 0;">- ODER EIGENES BILD -</div>
+
+            <div style="display: flex; justify-content: space-between; width: 100%;">
+                <span style="color: #a9b7d6; font-size: 14px;">Optionales Profilbild</span>
+                <span id="clear-pic-btn" style="color: #ef4444; font-size: 14px; cursor: pointer; display: none;">✖ Entfernen</span>
+            </div>
+            <input type="file" id="ranked-pic-input" accept="image/*" style="width: 100%; color: white;">
+            
+            <button class="cgo-play-btn" id="btn-start-ranked-game" style="margin-top: 10px; width: 100%;">Los geht's!</button>
         </div>
     </div>
-</div>
 
-<script>
-    // --- DARK MODE LOGIK ---
-    let isDarkMode = localStorage.getItem('lehrerRankingDarkMode') === 'true';
-    const darkModeBtn = document.getElementById('dark-mode-toggle');
+    <div id="leaderboard-screen" class="master-fullscreen hidden" style="z-index: 7000;">
+        <div class="master-fs-header">Top Spieler</div>
+        <div class="master-fs-content" id="leaderboard-list" style="overflow-y: auto; max-height: 60vh; padding-right: 10px;">
+        </div>
+        <div class="master-fs-footer" style="position: relative; margin-top: 20px; text-align: center; bottom: 0; left: 0; display: flex; justify-content: center; gap: 15px;">
+            <button class="btn-fs-back" id="btn-close-leaderboard" style="margin: 0;">
+                <svg viewBox="0 0 24 24" fill="white" width="24" height="24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+                Zurück
+            </button>
+            <button class="btn-fs-back" id="btn-retry-from-leaderboard" style="margin: 0; background-color: #31c817; box-shadow: 0 6px 0 #23930e, 0 10px 20px rgba(0,0,0,0.4); display: none;">
+                🔄 Retry
+            </button>
+        </div>
+    </div>
     
-    if(isDarkMode) {
-        document.body.classList.add('dark-mode');
-        darkModeBtn.innerText = '☀️';
-    } else {
-        darkModeBtn.innerText = '🌙';
-    }
-
-    function toggleDarkMode() {
-        isDarkMode = !isDarkMode;
-        if(isDarkMode) {
-            document.body.classList.add('dark-mode');
-            darkModeBtn.innerText = '☀️';
-        } else {
-            document.body.classList.remove('dark-mode');
-            darkModeBtn.innerText = '🌙';
-        }
-        localStorage.setItem('lehrerRankingDarkMode', isDarkMode);
-    }
-
-    // --- DATEN ---
-    let allTeachers = [
-        { id: 1, name: "Herr Angladagis" }, { id: 2, name: "Herr Arnold" }, { id: 3, name: "Herr Barocka" },
-        { id: 4, name: "Frau Belle-Häsler" }, { id: 5, name: "Frau Bellon" }, { id: 6, name: "Frau Binder" },
-        { id: 7, name: "Herr Böckler" }, { id: 8, name: "Frau Celik" }, { id: 9, name: "Herr Degler" },
-        { id: 10, name: "Frau Deubler" }, { id: 11, name: "Frau Dörflinger" }, { id: 12, name: "Herr Dudenhausen" },
-        { id: 13, name: "Frau Erhardt-Palagyi" }, { id: 14, name: "Herr Fees" }, { id: 15, name: "Frau Fees" },
-        { id: 16, name: "Herr Feger" }, { id: 17, name: "Herr Fleischle" }, { id: 18, name: "Herr Flüg" },
-        { id: 19, name: "Frau Frietsch" }, { id: 20, name: "Herr Gack" }, { id: 21, name: "Herr Gerth" },
-        { id: 22, name: "Herr Goll" }, { id: 23, name: "Frau Held" }, { id: 24, name: "Frau Herzig" },
-        { id: 25, name: "Frau Hicki" }, { id: 26, name: "Frau Hinzel" }, { id: 27, name: "Frau Jautz" },
-        { id: 28, name: "Herr Kast" }, { id: 29, name: "Frau Killian" }, { id: 30, name: "Frau Klein" },
-        { id: 31, name: "Herr Kleindienst" }, { id: 32, name: "Frau Köse" }, { id: 33, name: "Frau Krämer" },
-        { id: 34, name: "Frau Krauss" }, { id: 35, name: "Frau Laws" }, { id: 36, name: "Frau Lehmann" },
-        { id: 37, name: "Frau Lekies" }, { id: 38, name: "Frau Link-Woecht" }, { id: 39, name: "Herr Ludwig" },
-        { id: 40, name: "Herr Lutz" }, { id: 41, name: "Frau Martens" }, { id: 42, name: "Frau Negrich" },
-        { id: 43, name: "Frau Neubauer" }, { id: 44, name: "Herr Walter" }, { id: 45, name: "Herr Wecker" },
-        { id: 46, name: "Frau Walz" }, { id: 47, name: "Frau Weida" }, { id: 48, name: "Frau Weihs" },
-        { id: 49, name: "Frau Wörner" }, { id: 50, name: "Frau Windhager" }, { id: 51, name: "Frau Zwißler" },
-        { id: 52, name: "Frau Ostertag" }, { id: 53, name: "Frau Röver" }, { id: 54, name: "Frau Rudhart" },
-        { id: 55, name: "Herr Schalinski" }, { id: 56, name: "Frau Rüssler" }, { id: 57, name: "Herr Schilder" },
-        { id: 58, name: "Herr Schimpke" }, { id: 59, name: "Frau Schmid" }, { id: 60, name: "Frau Steinmüller" },
-        { id: 61, name: "Herr Schmid" }, { id: 62, name: "Herr Schroth" }, { id: 63, name: "Frau Schuler" },
-        { id: 64, name: "Frau Schulz" }, { id: 65, name: "Herr Schweizer" }, { id: 66, name: "Frau Seyer" },
-        { id: 67, name: "Frau Sturm" }, { id: 68, name: "Frau Theißen" }, { id: 69, name: "Frau Tiedemann" },
-        { id: 70, name: "Herr Traunecker" }, { id: 71, name: "Frau Utz" }, { id: 72, name: "Herr Vogt" }
-    ];
-
-    function getLastName(fullName) { return fullName.replace(/^(Herr|Frau)\s+/i, '').trim(); }
-    function getPrefix(fullName) { const match = fullName.match(/^(Herr|Frau)/i); return match ? match[1] : ''; }
-    function getGenderClass(fullName) { return getPrefix(fullName) === 'Herr' ? 'male' : (getPrefix(fullName) === 'Frau' ? 'female' : ''); }
-
-    allTeachers.sort((a, b) => getLastName(a.name).localeCompare(getLastName(b.name)));
-
-    // --- Profil Logik (Bleibt LOKAL, da Nutzer-spezifisch) ---
-    let userProfile = { grade: "Unbekannt", gender: "Unbekannt" };
-
-    function initProfileButtons() {
-        const savedProfile = JSON.parse(localStorage.getItem('evaluatorProfile'));
-        if (savedProfile) {
-            userProfile = savedProfile;
-        }
-        document.querySelectorAll('.profile-btn').forEach(btn => {
-            if (btn.dataset.type === 'grade' && btn.dataset.val === userProfile.grade) btn.classList.add('active');
-            if (btn.dataset.type === 'gender' && btn.dataset.val === userProfile.gender) btn.classList.add('active');
-
-            btn.addEventListener('click', () => {
-                const type = btn.dataset.type; const val = btn.dataset.val;
-                document.querySelectorAll(`.profile-btn[data-type="${type}"]`).forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                userProfile[type] = val;
-                localStorage.setItem('evaluatorProfile', JSON.stringify(userProfile));
-            });
-        });
-    }
-
-    // --- Runden Historie ---
-    let roundHistory = []; // Wird jetzt vom Server geladen
-    let currentSessionDuelsLog = []; 
-    let voteHistoryStack = []; 
-
-    function saveRoundToHistory(sessionDelta) {
-        let sessionWinner = "Niemand";
-        if (selectedTeachers.length > 0) {
-            let sortedSession = [...selectedTeachers].sort((a, b) => b.winrate - a.winrate || b.wins - a.wins);
-            sessionWinner = sortedSession[0].name;
-        }
-        const roundData = {
-            id: Date.now(),
-            date: new Date().toLocaleString('de-DE'),
-            grade: userProfile.grade, gender: userProfile.gender,
-            duelsCount: duelsPlayed, winner: sessionWinner,
-            delta: sessionDelta, logs: currentSessionDuelsLog
-        };
-        roundHistory.unshift(roundData); 
-        // Linit auf 50 Runden wurde hier entfernt, sodass es unbegrenzt weiter speichert
-    }
-
-    function toggleHistoryDetails(id) {
-        const detailsDiv = document.getElementById(`details-${id}`);
-        detailsDiv.style.display = detailsDiv.style.display === 'none' ? 'block' : 'none';
-    }
-
-    function deleteRound(roundId) {
-        if(!confirm("Möchtest du diese Runde wirklich löschen? Die Punkte werden von der All-Time Statistik abgezogen.")) return;
-        let roundIndex = roundHistory.findIndex(r => r.id === roundId);
-        if(roundIndex === -1) return;
-        let round = roundHistory[roundIndex];
+    <div id="hidden-room" class="master-fullscreen hidden" style="z-index: 9999; background: radial-gradient(circle, #4a00e0, #8e2de2);">
+        <div class="master-fs-header" style="color: #fff; text-shadow: 0 4px 15px rgba(255,255,255,0.5);">Admin Panel</div>
         
-        for(let tId in round.delta) {
-            if(globalStats[tId]) {
-                globalStats[tId].wins = Math.max(0, globalStats[tId].wins - round.delta[tId].wins);
-                globalStats[tId].losses = Math.max(0, globalStats[tId].losses - round.delta[tId].losses);
-                globalStats[tId].ties = Math.max(0, globalStats[tId].ties - round.delta[tId].ties);
-                globalStats[tId].diff = globalStats[tId].wins - globalStats[tId].losses;
-                let total = globalStats[tId].wins + globalStats[tId].losses + globalStats[tId].ties;
-                globalStats[tId].winrate = total > 0 ? (globalStats[tId].wins / total) * 100 : 0;
-            }
-        }
-        
-        roundHistory.splice(roundIndex, 1);
-        saveServerStats(); // NEU: Sendet Löschung ans Backend
-        renderAdminGrid(); renderHistoryList();
-    }
+        <div style="text-align: center; margin-bottom: 20px; display: flex; justify-content: center; gap: 10px;">
+            <input type="number" id="admin-global-highscore" placeholder="Global Highscore" style="width: 150px; padding: 10px; border-radius: 8px; border: none; background: #3b4c73; color: white; outline: none;">
+            <button class="action-btn" id="btn-admin-save-highscore" style="width: auto; padding: 0 15px; height: 38px;">Setzen</button>
+        </div>
 
-    function renderHistoryList() {
-        const list = document.getElementById('history-list'); list.innerHTML = '';
-        if (roundHistory.length === 0) {
-            list.innerHTML = `<div class="history-item" style="color:${isDarkMode?'#aaa':'#666'}; text-align:center;">Noch keine Runden gespielt.</div>`; return;
-        }
-        roundHistory.forEach(r => {
-            const div = document.createElement('div'); div.className = 'history-item';
-            let logsHtml = (r.logs || []).map(log => `<div style="padding: 3px 0; border-bottom: 1px dashed #eee;">${log}</div>`).join('');
-            if(!logsHtml) logsHtml = "<div>Keine spezifischen Duelle aufgezeichnet.</div>";
-            div.innerHTML = `
-                <div style="display:flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <span class="history-date">${r.date}</span> | 
-                        <strong>Bewerter:</strong> Klasse ${r.grade} (${r.gender}) | 
-                        <strong>Duelle:</strong> ${r.duelsCount} | 
-                        <strong>Platz 1:</strong> 🏆 ${r.winner}
-                    </div>
-                    <div>
-                        <button class="btn-info" style="padding: 6px 12px; font-size: 13px;" onclick="toggleHistoryDetails(${r.id})">Details / Bearbeiten</button>
-                    </div>
-                </div>
-                <div id="details-${r.id}" style="display:none; margin-top: 15px; padding: 15px; background: ${isDarkMode?'#1e1e1e':'#fff'}; border: 1px solid #dee2e6; border-radius: 8px;">
-                    <h4 style="margin-top:0; margin-bottom:10px; font-size: 14px; color: ${isDarkMode?'#e0e0e0':'#495057'};">Abgestimmte Duelle:</h4>
-                    <div style="font-size: 13px; color: ${isDarkMode?'#aaa':'#666'}; max-height: 200px; overflow-y: auto; margin-bottom: 15px; background: ${isDarkMode?'#2a2a2a':'#f8f9fa'}; padding: 10px; border-radius: 6px;">
-                        ${logsHtml}
-                    </div>
-                    <button class="btn-danger" style="padding: 8px 15px; font-size: 13px;" onclick="deleteRound(${r.id})">🗑️ Diese Runde komplett löschen (Punkte abziehen)</button>
-                </div>
-            `;
-            list.appendChild(div);
-        });
-    }
+        <div style="text-align: center; margin-bottom: 15px;">
+            <button class="action-btn" id="btn-admin-add" style="width: 250px; height: 50px; font-size: 18px; background-color: #3b4c73; box-shadow: 0 4px 0 #212943;">+ Neuen Eintrag hinzufügen</button>
+        </div>
+        <div class="master-fs-content" id="admin-list" style="overflow-y: auto; max-height: 60vh; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 12px;">
+            </div>
+        <div class="master-fs-footer" style="position: relative; margin-top: 20px; text-align: center; bottom: 0; left: 0;">
+            <button class="btn-fs-back" id="btn-leave-room" style="margin: 0 auto; background-color: #333; box-shadow: 0 6px 0 #111;">Schließen</button>
+        </div>
+    </div>
 
-    function clearHistory() {
-        if(confirm("Möchtest du den gesamten Runden-Verlauf wirklich löschen? ACHTUNG: Dabei werden auch alle dazugehörigen Punkte aus der All-Time Statistik abgezogen!")) {
+    <div id="admin-edit-modal" class="settings-overlay hidden" style="z-index: 10000;">
+        <div class="settings-content" style="display: flex; flex-direction: column; gap: 15px; align-items: center; position: relative;">
+            <div class="settings-header" style="width: 100%; position: relative; min-height: 32px; justify-content: center; display: flex;">
+                <span id="admin-modal-title" style="font-size: 22px; text-align: center; margin: 0;">Eintrag bearbeiten</span>
+                <span class="close-settings" id="close-admin-edit" style="position: absolute; right: -5px; top: -5px; transform: none;">✕</span>
+            </div>
             
-            // Jeden Punkt aus den Runden abziehen
-            roundHistory.forEach(round => {
-                if(round.delta) {
-                    for(let tId in round.delta) {
-                        if(globalStats[tId]) {
-                            globalStats[tId].wins = Math.max(0, globalStats[tId].wins - round.delta[tId].wins);
-                            globalStats[tId].losses = Math.max(0, globalStats[tId].losses - round.delta[tId].losses);
-                            globalStats[tId].ties = Math.max(0, globalStats[tId].ties - (round.delta[tId].ties || 0));
-                            globalStats[tId].diff = globalStats[tId].wins - globalStats[tId].losses;
-                            let total = globalStats[tId].wins + globalStats[tId].losses + globalStats[tId].ties;
-                            globalStats[tId].winrate = total > 0 ? (globalStats[tId].wins / total) * 100 : 0;
-                        }
-                    }
-                }
-            });
+            <input type="hidden" id="admin-edit-index">
+            <input type="text" id="admin-name" placeholder="Spielername" style="width: 100%; padding: 10px; border-radius: 8px; border: none; background: #3b4c73; color: white; outline: none;">
+            <input type="number" id="admin-score" placeholder="Score" style="width: 100%; padding: 10px; border-radius: 8px; border: none; background: #3b4c73; color: white; outline: none;">
+            <input type="text" id="admin-date" placeholder="Datum (z.B. 12.10.2023)" style="width: 100%; padding: 10px; border-radius: 8px; border: none; background: #3b4c73; color: white; outline: none;">
+            <input type="text" id="admin-time" placeholder="Uhrzeit (z.B. 14:30)" style="width: 100%; padding: 10px; border-radius: 8px; border: none; background: #3b4c73; color: white; outline: none;">
+            
+            <div style="display: flex; justify-content: space-between; width: 100%; margin-top: 5px;">
+                <span style="color: #a9b7d6; font-size: 14px;">Profilbild</span>
+                <span id="admin-clear-pic" style="color: #ef4444; font-size: 14px; cursor: pointer;">✖ Entfernen</span>
+            </div>
+            <input type="file" id="admin-pic-input" accept="image/*" style="width: 100%; color: white;">
+            
+            <button class="cgo-play-btn" id="btn-admin-save" style="margin-top: 10px; width: 100%; height: 50px;">Speichern</button>
+        </div>
+    </div>
 
-            roundHistory = [];
-            saveServerStats(); // Speichert die genullten Stats und den leeren Verlauf
-            renderHistoryList();
-            renderAdminGrid(); // Aktualisiert die Zahlen direkt im Admin Panel
-        }
-    }
-
-    let selectedTeachers = []; let matchups = []; let knownResults = {}; 
-    let currentMatch = null; let isVoting = false; 
-    let currentSortType = 'winrate'; let sortAscending = false; 
-    let isAllTimeOnlyMode = false; let duelsPlayed = 0; 
-
-    // --- GLOBALE STATS & DATEN (Vom Server) ---
-    let globalStats = {};
-
-    async function loadServerStats() {
-        try {
-            const response = await fetch('/api/stats');
-            if (response.ok) {
-                const data = await response.json();
-                
-                // Prüfen, ob es das neue "große Paket" ist
-                if(data.stats) {
-                    globalStats = data.stats;
-                    roundHistory = data.history || [];
-                    const customNames = data.customData || {};
-                    
-                    // Geänderte Namen anwenden
-                    allTeachers.forEach(t => { if (customNames[t.id]) t.name = customNames[t.id].name; });
-                    allTeachers.sort((a, b) => getLastName(a.name).localeCompare(getLastName(b.name)));
-                } else {
-                    // Falls noch alte Daten (nur Stats) auf dem Server liegen
-                    globalStats = data || {};
-                    roundHistory = [];
-                }
-            } else {
-                globalStats = {}; 
-            }
-        } catch (e) {
-            console.error("Konnte nicht vom Server laden, nutze leere Stats", e);
-            globalStats = {};
-        }
-
-        allTeachers.forEach(t => {
-            knownResults[t.id] = {};
-            if (!globalStats[t.id]) globalStats[t.id] = { wins: 0, losses: 0, ties: 0, diff: 0, winrate: 0 };
-            if (globalStats[t.id].ties === undefined) globalStats[t.id].ties = 0;
-        });
-    }
-
-    async function saveServerStats() {
-        // Bereite Custom-Namen zum Speichern vor
-        let customDataToSave = {};
-        allTeachers.forEach(teacher => {
-            customDataToSave[teacher.id] = { name: teacher.name };
-        });
-
-        // Packe alles in ein großes Paket
-        const payload = {
-            stats: globalStats,
-            history: roundHistory,
-            customData: customDataToSave
-        };
-
-        try {
-            await fetch('/api/stats', {
-                method: 'POST',
-                body: JSON.stringify(payload),
-                headers: { 'Content-Type': 'application/json' }
-            });
-            console.log("Erfolgreich auf Cloudflare (Paket) gespeichert!");
-        } catch (e) {
-            console.error("Fehler beim Speichern auf dem Server", e);
-        }
-    }
-
-    function getRemainingDuelsCount() {
-        let count = 0;
-        for (let i = 0; i < selectedTeachers.length; i++) {
-            for (let j = i + 1; j < selectedTeachers.length; j++) {
-                if (knownResults[selectedTeachers[i].id][selectedTeachers[j].id] === undefined) count++;
-            }
-        }
-        return count;
-    }
-
-    function filterTeachers() {
-        const query = document.getElementById('search-input').value.toLowerCase();
-        document.getElementById('clear-search').style.display = query.length > 0 ? 'block' : 'none';
-        document.querySelectorAll('.teacher-item').forEach(item => {
-            const lastName = item.querySelector('.teacher-lastname').innerText.toLowerCase();
-            const prefix = item.querySelector('.teacher-prefix').innerText.toLowerCase();
-            if (lastName.includes(query) || prefix.includes(query)) item.style.display = 'flex';
-            else item.style.display = 'none';
-        });
-    }
-
-    function clearSearch() { document.getElementById('search-input').value = ''; filterTeachers(); }
-
-    // Admin & Secret Logic
-    let statsClicks = 0; let statsTimer;
-    document.getElementById('trigger-stats').addEventListener('click', () => {
-        statsClicks++; clearTimeout(statsTimer);
-        if (statsClicks >= 2) {
-            const statsDiv = document.getElementById('duel-stats');
-            statsDiv.style.display = statsDiv.style.display === 'none' ? 'block' : 'none';
-            document.getElementById('stat-done').innerText = duelsPlayed;
-            document.getElementById('stat-left').innerText = getRemainingDuelsCount();
-            statsClicks = 0;
-        } else { statsTimer = setTimeout(() => statsClicks = 0, 400); }
-    });
-
-    let welcheClicks = 0; let lehrerClicks = 0; let secretTimer;
-    document.getElementById('trigger-welche').addEventListener('click', () => {
-        welcheClicks++; clearTimeout(secretTimer);
-        secretTimer = setTimeout(() => { welcheClicks = 0; lehrerClicks = 0; }, 4000); 
-    });
+    <script src="ahmad.js"></script>
+    <script src="zemanuel.js"></script>
+    <script src="zadrian.js"></script> 
+    <script src="zassets.js"></script>
     
-    document.getElementById('trigger-lehrer').addEventListener('click', () => {
-        if (welcheClicks >= 2) {
-            lehrerClicks++;
-            if (lehrerClicks >= 2) { 
-                let pwd = prompt("Bitte Admin-Passwort eingeben:");
-                if (pwd !== null) {
-                    let h = 0; 
-                    for(let i = 0; i < pwd.length; i++) {
-                        h = Math.imul(31, h) + pwd.charCodeAt(i) | 0;
-                    }
-                    if (h === 1568) { // Passwort ist "11"
-                        openAdmin(); 
-                    } else {
-                        alert("Falsches Passwort! Zugriff verweigert.");
-                    }
-                }
-                welcheClicks = 0; lehrerClicks = 0; clearTimeout(secretTimer); 
-            }
-        }
-    });
-
-    function openAdmin() { document.getElementById('main-view').style.display = 'none'; document.getElementById('admin-screen').style.display = 'block'; renderAdminGrid(); renderHistoryList(); }
-    function closeAdmin() { document.getElementById('admin-screen').style.display = 'none'; document.getElementById('main-view').style.display = 'block'; }
-    function resetAllTimeStats() {
-        if(confirm("ACHTUNG: Möchtest du wirklich ALLE All-Time Statistiken auf 0 setzen?")) {
-            allTeachers.forEach(t => { globalStats[t.id] = { wins: 0, losses: 0, ties: 0, diff: 0, winrate: 0 }; });
-            saveServerStats(); 
-            renderAdminGrid(); alert("Zurückgesetzt!");
-        }
-    }
-    function renderAdminGrid() {
-        const grid = document.getElementById('admin-grid'); grid.innerHTML = '';
-        allTeachers.forEach(teacher => {
-            let stats = globalStats[teacher.id]; const div = document.createElement('div'); div.className = 'admin-item';
-            div.innerHTML = `
-                <label><strong>Name:</strong></label><input type="text" id="admin-name-${teacher.id}" value="${teacher.name}">
-                <div style="display: flex; gap: 10px; margin-top: 5px;">
-                    <div style="flex: 1;"><label style="font-size: 12px;">Wins:</label><input type="number" id="admin-wins-${teacher.id}" value="${stats.wins}"></div>
-                    <div style="flex: 1;"><label style="font-size: 12px;">Losses:</label><input type="number" id="admin-losses-${teacher.id}" value="${stats.losses}"></div>
-                    <div style="flex: 1;"><label style="font-size: 12px;">Ties:</label><input type="number" id="admin-ties-${teacher.id}" value="${stats.ties || 0}"></div>
-                </div>`;
-            grid.appendChild(div);
-        });
-    }
-    function saveAdminChanges() {
-        allTeachers.forEach(teacher => {
-            teacher.name = document.getElementById(`admin-name-${teacher.id}`).value;
-            let w = parseInt(document.getElementById(`admin-wins-${teacher.id}`).value) || 0; let l = parseInt(document.getElementById(`admin-losses-${teacher.id}`).value) || 0; let t = parseInt(document.getElementById(`admin-ties-${teacher.id}`).value) || 0;
-            globalStats[teacher.id] = { wins: w, losses: l, ties: t, diff: w - l, winrate: (w+l+t)>0 ? (w/(w+l+t))*100 : 0 };
-        });
-        
-        allTeachers.sort((a, b) => getLastName(a.name).localeCompare(getLastName(b.name))); 
-        saveServerStats(); // Speichert nun auch die Namen ab
-        renderTeacherSelectionGrid(); closeAdmin(); alert("Gespeichert!");
-    }
-
-    // --- Window Onload mit await ---
-    window.onload = async () => { 
-        initProfileButtons(); 
-        await loadServerStats();
-        renderTeacherSelectionGrid(); 
-    };
-
-    function renderTeacherSelectionGrid() {
-        const grid = document.getElementById('teacher-grid'); grid.innerHTML = ''; 
-        allTeachers.forEach(teacher => {
-            const div = document.createElement('div'); div.className = `teacher-item ${getGenderClass(teacher.name)}`;
-            div.innerHTML = `<input type="checkbox" id="t-${teacher.id}" value="${teacher.id}"><div class="teacher-prefix">${getPrefix(teacher.name)}</div><div class="teacher-lastname">${getLastName(teacher.name)}</div>`;
-            div.addEventListener('click', (e) => {
-                if(e.target.tagName !== 'INPUT') { const cb = div.querySelector('input'); cb.checked = !cb.checked; toggleSelectionStyle(div, cb.checked); handleSelectionChange(); }
-            });
-            grid.appendChild(div);
-        });
-    }
-
-    function toggleSelectionStyle(element, isChecked) { if(isChecked) element.classList.add('selected'); else element.classList.remove('selected'); }
-    function selectAll(check) {
-        document.querySelectorAll('.teacher-item').forEach(item => { const cb = item.querySelector('input[type="checkbox"]'); cb.checked = check; toggleSelectionStyle(item, check); });
-        handleSelectionChange();
-    }
-
-    function showAllTimeOnly() { 
-        isAllTimeOnlyMode = true; document.getElementById('main-view').style.display = 'none'; 
-        document.getElementById('results-screen').style.display = 'block'; 
-        document.getElementById('results-main-title').innerHTML = "🏆 Lehrer Ranking 🏆";
-        sortResults('winrate', true); window.scrollTo({ top: 0, behavior: 'smooth' }); 
-    }
-
-    function handleSelectionChange() {
-        voteHistoryStack = [];
-        document.getElementById('btn-undo').style.display = 'none';
-
-        selectedTeachers = [];
-        document.querySelectorAll('.teacher-item input[type="checkbox"]:checked').forEach(cb => {
-            const id = parseInt(cb.value); const teacher = allTeachers.find(t => t.id === id); 
-            if(teacher) selectedTeachers.push({...teacher});
-        });
-        
-        const rankingSection = document.getElementById('ranking-section');
-        if (selectedTeachers.length < 2) { rankingSection.style.display = 'none'; currentMatch = null; return; }
-        rankingSection.style.display = 'block'; 
-        
-        if (currentMatch && (!selectedTeachers.find(t=>t.id===currentMatch[0].id) || !selectedTeachers.find(t=>t.id===currentMatch[1].id))) {
-            currentMatch = null;
-        }
-        if (!currentMatch) filterMatchupsAndLoadNext();
-    }
-
-    function recordWin(winnerId, loserId) {
-        if (knownResults[winnerId][loserId] === true) return; 
-        knownResults[winnerId][loserId] = true; knownResults[loserId][winnerId] = false; 
-        let superiors = [winnerId]; for (let t of selectedTeachers) { if (knownResults[t.id][winnerId] === true) superiors.push(t.id); }
-        let inferiors = [loserId]; for (let t of selectedTeachers) { if (knownResults[loserId][t.id] === true) inferiors.push(t.id); }
-        for (let s of superiors) {
-            for (let i of inferiors) { if (s !== i && knownResults[s][i] === undefined) { knownResults[s][i] = true; knownResults[i][s] = false; } }
-        }
-    }
-
-    function updateMatchUI(teacherA, teacherB) {
-        document.getElementById('prefix-a').innerText = getPrefix(teacherA.name); 
-        document.getElementById('lastname-a').innerText = getLastName(teacherA.name); 
-        document.getElementById('btn-a').innerText = `Für ${getLastName(teacherA.name)} stimmen`; 
-        document.getElementById('display-a').className = `big-name-display ${getGenderClass(teacherA.name)}`;
-        
-        document.getElementById('prefix-b').innerText = getPrefix(teacherB.name); 
-        document.getElementById('lastname-b').innerText = getLastName(teacherB.name); 
-        document.getElementById('btn-b').innerText = `Für ${getLastName(teacherB.name)} stimmen`; 
-        document.getElementById('display-b').className = `big-name-display ${getGenderClass(teacherB.name)}`;
-    }
-
-    function filterMatchupsAndLoadNext() {
-        matchups = [];
-        for (let i = 0; i < selectedTeachers.length; i++) {
-            for (let j = i + 1; j < selectedTeachers.length; j++) {
-                if (knownResults[selectedTeachers[i].id][selectedTeachers[j].id] === undefined) {
-                    matchups.push([selectedTeachers[i], selectedTeachers[j]]);
-                }
-            }
-        }
-
-        document.getElementById('stat-done').innerText = duelsPlayed; 
-        document.getElementById('stat-left').innerText = getRemainingDuelsCount();
-        
-        let totalPossible = (selectedTeachers.length * (selectedTeachers.length - 1)) / 2;
-        let remaining = getRemainingDuelsCount();
-        let resolved = totalPossible - remaining;
-        let progressPercent = totalPossible > 0 ? (resolved / totalPossible) * 100 : 0;
-        document.getElementById('progress-bar-fill').style.width = progressPercent + '%';
-
-        if (matchups.length === 0) {
-            currentMatch = null; showResults(); return;
-        }
-
-        matchups.sort((pairA, pairB) => {
-            let winrateA0 = globalStats[pairA[0].id].winrate || 0; let winrateA1 = globalStats[pairA[1].id].winrate || 0;
-            let diffA = Math.abs(winrateA0 - winrateA1);
-            let winrateB0 = globalStats[pairB[0].id].winrate || 0; let winrateB1 = globalStats[pairB[1].id].winrate || 0;
-            let diffB = Math.abs(winrateB0 - winrateB1);
-            if (diffA === diffB) return 0.5 - Math.random();
-            return diffA - diffB;
-        });
-
-        document.getElementById('arena').style.display = 'flex'; 
-        document.getElementById('action-buttons-container').style.display = 'flex';
-        
-        currentMatch = matchups[0]; 
-        updateMatchUI(currentMatch[0], currentMatch[1]);
-        
-        document.getElementById('arena').style.opacity = 1; 
-        isVoting = false;
-    }
-
-    function undoLastVote() {
-        if (voteHistoryStack.length === 0 || isVoting) return;
-
-        let lastState = voteHistoryStack.pop();
-
-        knownResults = lastState.knownResults;
-        duelsPlayed = lastState.duelsPlayed;
-        currentSessionDuelsLog = currentSessionDuelsLog.slice(0, lastState.logLength);
-        currentMatch = lastState.match;
-
-        document.getElementById('stat-done').innerText = duelsPlayed;
-        document.getElementById('stat-left').innerText = getRemainingDuelsCount();
-
-        let totalPossible = (selectedTeachers.length * (selectedTeachers.length - 1)) / 2;
-        let remaining = getRemainingDuelsCount();
-        let resolved = totalPossible - remaining;
-        let progressPercent = totalPossible > 0 ? (resolved / totalPossible) * 100 : 0;
-        document.getElementById('progress-bar-fill').style.width = progressPercent + '%';
-
-        updateMatchUI(currentMatch[0], currentMatch[1]);
-
-        document.getElementById('arena').style.display = 'flex';
-        document.getElementById('action-buttons-container').style.display = 'flex';
-        document.getElementById('arena').style.opacity = 1;
-        isVoting = false;
-
-        if (voteHistoryStack.length === 0) {
-            document.getElementById('btn-undo').style.display = 'none';
-        }
-    }
-
-    function vote(choice) {
-        if (isVoting || !currentMatch) return; isVoting = true;
-
-        voteHistoryStack.push({
-            match: [...currentMatch],
-            knownResults: JSON.parse(JSON.stringify(knownResults)),
-            duelsPlayed: duelsPlayed,
-            logLength: currentSessionDuelsLog.length
-        });
-        document.getElementById('btn-undo').style.display = 'inline-block';
-
-        const teacherA = currentMatch[0]; const teacherB = currentMatch[1];
-        
-        let logText = "";
-        if (choice === 'A') logText = `✅ ${teacherA.name} gewinnt gegen ${teacherB.name}`;
-        else if (choice === 'B') logText = `✅ ${teacherB.name} gewinnt gegen ${teacherA.name}`;
-        else if (choice === 'TIE') logText = `🤝 Unentschieden: ${teacherA.name} = ${teacherB.name}`;
-        else if (choice === 'SKIP') logText = `⏭️ Übersprungen: ${teacherA.name} vs ${teacherB.name}`;
-        currentSessionDuelsLog.push(logText);
-
-        if (choice === 'A') { duelsPlayed++; recordWin(teacherA.id, teacherB.id); document.getElementById('card-a').classList.add('flash-green'); }
-        else if (choice === 'B') { duelsPlayed++; recordWin(teacherB.id, teacherA.id); document.getElementById('card-b').classList.add('flash-green'); }
-        else if (choice === 'TIE') { duelsPlayed++; knownResults[teacherA.id][teacherB.id]="TIE"; knownResults[teacherB.id][teacherA.id]="TIE"; document.getElementById('card-a').classList.add('flash-green'); document.getElementById('card-b').classList.add('flash-green'); }
-        else if (choice === 'SKIP') { knownResults[teacherA.id][teacherB.id] = "SKIPPED"; knownResults[teacherB.id][teacherA.id] = "SKIPPED"; }
-        
-        setTimeout(() => { document.getElementById('arena').style.opacity = 0; setTimeout(() => { document.getElementById('card-a').classList.remove('flash-green'); document.getElementById('card-b').classList.remove('flash-green'); filterMatchupsAndLoadNext(); }, 250); }, 350); 
-    }
-
-    function calculateFinalScores() {
-        if (isAllTimeOnlyMode) return; 
-        let sessionDelta = {}; 
-
-        selectedTeachers.forEach(t => {
-            let sessionWins = 0, sessionLosses = 0, sessionTies = 0;
-            for (let otherId in knownResults[t.id]) {
-                if (selectedTeachers.some(st => st.id == otherId)) {
-                    if (knownResults[t.id][otherId] === true) sessionWins++; else if (knownResults[t.id][otherId] === false) sessionLosses++; else if (knownResults[t.id][otherId] === "TIE") sessionTies++;
-                }
-            }
-            t.wins = sessionWins; t.losses = sessionLosses; t.ties = sessionTies; t.diff = sessionWins - sessionLosses;
-            let sessionTotal = sessionWins + sessionLosses + sessionTies; t.winrate = sessionTotal > 0 ? (sessionWins / sessionTotal) * 100 : 0;
-            
-            if (sessionTotal > 0) {
-                sessionDelta[t.id] = { wins: sessionWins, losses: sessionLosses, ties: sessionTies };
-            }
-
-            if (duelsPlayed > 0) {
-                globalStats[t.id].wins += sessionWins; globalStats[t.id].losses += sessionLosses; globalStats[t.id].ties += sessionTies; globalStats[t.id].diff = globalStats[t.id].wins - globalStats[t.id].losses;
-                let gTotal = globalStats[t.id].wins + globalStats[t.id].losses + globalStats[t.id].ties; globalStats[t.id].winrate = gTotal > 0 ? (globalStats[t.id].wins / gTotal) * 100 : 0;
-            }
-        });
-
-        if (duelsPlayed > 0) {
-            saveRoundToHistory(sessionDelta); // ERST den Verlauf aktualisieren...
-            saveServerStats(); // ...DANN das gesamte Paket an Cloudflare senden
-        }
-    }
-
-    function sortResults(type, forceReset = false) {
-        if (forceReset) {
-            currentSortType = type; sortAscending = (type === 'name'); 
-        } else if (currentSortType === type) {
-            sortAscending = !sortAscending; 
-        } else {
-            currentSortType = type; sortAscending = (type === 'name');
-        }
-        
-        const headers = ['name', 'wins', 'losses', 'diff', 'winrate'];
-        headers.forEach(h => {
-            let el = document.getElementById(`th-${h}`);
-            if(el) el.classList.remove('active-sort', 'asc', 'desc');
-        });
-        
-        let activeEl = document.getElementById(`th-${type}`);
-        if(activeEl) {
-            activeEl.classList.add('active-sort');
-            activeEl.classList.add(sortAscending ? 'asc' : 'desc');
-        }
-        renderResultLists();
-    }
-
-    function showResults() {
-        calculateFinalScores(); 
-        document.getElementById('main-view').style.display = 'none';
-        document.getElementById('results-screen').style.display = 'block';
-        sortResults('winrate', true); 
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function renderResultLists() {
-        const top10List = document.getElementById('top10-list'); 
-        const tableBody = document.getElementById('full-result-list');
-        const mainListContainer = document.getElementById('main-list-container');
-        
-        top10List.innerHTML = ''; tableBody.innerHTML = '';
-
-        let allTimeArray = allTeachers.map(t => ({
-            ...t, globalWins: globalStats[t.id].wins, globalLosses: globalStats[t.id].losses,
-            globalTies: globalStats[t.id].ties || 0, globalDiff: globalStats[t.id].diff, globalWinrate: globalStats[t.id].winrate || 0
-        })).filter(t => t.globalWins > 0 || t.globalLosses > 0 || t.globalTies > 0);
-        
-        let dir = sortAscending ? 1 : -1;
-
-        allTimeArray.sort((a, b) => {
-            if (currentSortType === 'name') return dir * getLastName(a.name).localeCompare(getLastName(b.name));
-            if (currentSortType === 'winrate') return dir * ((a.globalWinrate - b.globalWinrate) || (a.globalWins - b.globalWins));
-            if (currentSortType === 'diff') return dir * (a.globalDiff - b.globalDiff);
-            if (currentSortType === 'wins') return dir * (a.globalWins - b.globalWins);
-            if (currentSortType === 'losses') return dir * ((a.globalLosses - b.globalLosses) || (a.globalWins - b.globalWins));
-            return 0;
-        });
-
-        let sidebarSorted = [...allTimeArray].sort((a, b) => b.globalWinrate - a.globalWinrate || b.globalWins - a.globalWins);
-
-        if (isAllTimeOnlyMode) {
-            document.getElementById('sidebar-container').style.display = 'none';
-            document.getElementById('main-list-title').innerHTML = '⭐ All-Time Ranking (Alle bisherigen Bewertungen)';
-            mainListContainer.classList.add('all-time-glow');
-            if (allTimeArray.length === 0) tableBody.innerHTML = `<tr><td colspan="7" class="td-center" style="color:${isDarkMode?'#aaa':'#666'}; padding: 20px;">Noch keine Bewertungen vorhanden.</td></tr>`;
-            allTimeArray.forEach((teacher, index) => appendTableRow(tableBody, teacher, index, true));
-        } else {
-            document.getElementById('sidebar-container').style.display = 'block';
-            document.getElementById('main-list-title').innerHTML = 'Dein persönliches Ranking (Diese Runde)';
-            mainListContainer.classList.remove('all-time-glow');
-            
-            sidebarSorted.slice(0, 10).forEach((teacher, index) => {
-                const li = document.createElement('li');
-                if (index === 0) li.classList.add('rank-1');
-                else if (index === 1) li.classList.add('rank-2');
-                else if (index === 2) li.classList.add('rank-3');
-
-                let prefix = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `#${index + 1}`;
-                li.innerHTML = `
-                    <div class="rank">${prefix}</div>
-                    <div class="name">${teacher.name}</div>
-                    <div class="stats">
-                        <span class="stat-wins">👍 ${teacher.globalWins}</span>
-                        <span class="stat-losses">👎 ${teacher.globalLosses}</span>
-                        <span class="stat-quote">${teacher.globalWinrate.toFixed(0)}%</span>
-                    </div>
-                `;
-                top10List.appendChild(li);
-            });
-            
-            if(selectedTeachers.length === 0) tableBody.innerHTML = '<tr><td colspan="7" class="td-center">Keine Daten für diese Sitzung.</td></tr>';
-            
-            selectedTeachers.sort((a, b) => {
-                if (currentSortType === 'name') return dir * getLastName(a.name).localeCompare(getLastName(b.name));
-                if (currentSortType === 'winrate') return dir * ((a.winrate - b.winrate) || (a.wins - b.wins));
-                if (currentSortType === 'diff') return dir * (a.diff - b.diff);
-                if (currentSortType === 'wins') return dir * (a.wins - b.wins);
-                if (currentSortType === 'losses') return dir * ((a.losses - b.losses) || (a.wins - b.wins));
-                return 0;
-            });
-            selectedTeachers.forEach((teacher, index) => appendTableRow(tableBody, teacher, index, false));
-        }
-    }
-
-    function appendTableRow(tbody, teacher, index, isGlobal) {
-        const tr = document.createElement('tr');
-        if(!sortAscending && (currentSortType === 'winrate' || currentSortType === 'wins' || currentSortType === 'diff')) {
-            if(index === 0) tr.classList.add('rank-row-1');
-            if(index === 1) tr.classList.add('rank-row-2');
-            if(index === 2) tr.classList.add('rank-row-3');
-        }
-
-        let prefix = `${index + 1}.`;
-        if(!sortAscending && (currentSortType === 'winrate' || currentSortType === 'wins' || currentSortType === 'diff')) {
-            if(index === 0) prefix = "🥇";
-            if(index === 1) prefix = "🥈";
-            if(index === 2) prefix = "🥉";
-        }
-
-        let wins = isGlobal ? teacher.globalWins : teacher.wins;
-        let losses = isGlobal ? teacher.globalLosses : teacher.losses;
-        let ties = isGlobal ? teacher.globalTies : teacher.ties;
-        let diff = isGlobal ? teacher.globalDiff : teacher.diff;
-        let winrate = isGlobal ? teacher.globalWinrate : teacher.winrate;
-
-        let diffClass = diff > 0 ? 'score-positive' : (diff < 0 ? 'score-negative' : 'score-neutral');
-        let diffText = (diff > 0 ? '+' : '') + diff;
-        let winrateText = winrate.toFixed(0) + '%';
-
-        tr.innerHTML = `
-            <td class="td-center" style="color: #6c757d; font-weight: bold;">${prefix}</td>
-            <td class="name-col" title="${teacher.name}">${teacher.name}</td>
-            <td class="score-positive">${wins}</td>
-            <td class="score-negative">${losses}</td>
-            <td class="td-center score-neutral">${ties > 0 ? ties : '-'}</td>
-            <td class="${diffClass}">${diffText}</td>
-            <td style="font-weight: 900; font-size: 17px; color: ${isDarkMode?'#e0e0e0':'#2c3e50'}; text-align: center;">
-                ${winrateText}
-            </td>
-        `;
-        tbody.appendChild(tr);
-    }
-</script>
-
+    <script src="script_part1.js"></script>
+    <script src="script_part2.js"></script>
 </body>
 </html>
