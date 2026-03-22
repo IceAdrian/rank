@@ -691,12 +691,13 @@ function clearPreview() {
     document.querySelectorAll('.cell.will-clear').forEach(cell => { cell.classList.remove('will-clear'); });
 }
 
-// --- DRAG & DROP LOGIK ---
+// --- DRAG & DROP LOGIK (PERFORMANCE BOOSTED) ---
 let isDragging = false, activeShape = null, draggedShapeKey = null;
 let startMouseX = 0, startMouseY = 0, startElementX = 0, startElementY = 0;
 let currentTargetRow = -1, currentTargetCol = -1;
-let lastPreviewRow = -1, lastPreviewCol = -1; // Performance-Boost Variable
+let lastPreviewRow = -1, lastPreviewCol = -1; 
 let currentScale = 1; 
+let boardRectLeft = 0, boardRectTop = 0; 
 
 shapeSlots.forEach((slot, index) => {
     slot.addEventListener('pointerdown', (e) => {
@@ -726,6 +727,11 @@ shapeSlots.forEach((slot, index) => {
         const rect = container.getBoundingClientRect();
         currentScale = rect.width / container.offsetWidth || 1;
 
+        // Einmalige Berechnung des Spielfelds (verhindert Lags)
+        const boardRect = boardElement.getBoundingClientRect();
+        boardRectLeft = boardRect.left;
+        boardRectTop = boardRect.top;
+
         startMouseX = e.clientX; 
         startMouseY = e.clientY;
         
@@ -750,20 +756,20 @@ document.addEventListener('pointermove', (e) => {
     const dx = (e.clientX - startMouseX) / currentScale; 
     const dy = (e.clientY - startMouseY) / currentScale;
     
-    activeShape.style.left = (startElementX + dx) + 'px'; 
-    activeShape.style.top = (startElementY + dy) + 'px';
-
-    const activeRect = activeShape.getBoundingClientRect();
-    const boardRect = boardElement.getBoundingClientRect();
+    const newLeft = startElementX + dx;
+    const newTop = startElementY + dy;
     
-    const xInsideBoard = activeRect.left - boardRect.left;
-    const yInsideBoard = activeRect.top - boardRect.top;
+    activeShape.style.left = newLeft + 'px'; 
+    activeShape.style.top = newTop + 'px';
+    
+    const xInsideBoard = newLeft - boardRectLeft;
+    const yInsideBoard = newTop - boardRectTop;
     
     const cellSize = 72 * currentScale;
     const col = Math.floor((xInsideBoard + (cellSize / 2)) / cellSize);
     const row = Math.floor((yInsideBoard + (cellSize / 2)) / cellSize);
 
-    // PERFORMANCE BOOST: Aktualisiert die Vorschau nur bei Feld-Wechsel
+    // PERFORMANCE BOOST: Berechnet nur neu, wenn das Kästchen wirklich wechselt
     if (row !== lastPreviewRow || col !== lastPreviewCol) {
         lastPreviewRow = row;
         lastPreviewCol = col;
@@ -773,23 +779,22 @@ document.addEventListener('pointermove', (e) => {
         currentTargetCol = -1;
 
         const shapeData = shapeDefinitions[draggedShapeKey];
-        const activeColor = activeShape.dataset.color; 
         
         if (canPlace(shapeData, row, col)) {
             currentTargetRow = row;
             currentTargetCol = col;
             
-            // 1. Vorschau zeichnen
+            // 1. Elegante Glas-Vorschau statt laggy Bild-Vorschau
             for (let r = 0; r < shapeData.matrix.length; r++) {
                 for (let c = 0; c < shapeData.matrix[r].length; c++) {
                     if (shapeData.matrix[r][c] === 1) {
                         const targetCell = document.querySelector(`.cell[data-row="${row + r}"][data-col="${col + c}"]`);
-                        if (targetCell) { targetCell.classList.add('preview'); targetCell.classList.add(activeColor); }
+                        if (targetCell) { targetCell.classList.add('preview'); }
                     }
                 }
             }
 
-            // 2. Prüfen, ob eine Linie aufgelöst wird (Vorschau-Leuchten)
+            // 2. Prüfen, ob eine Linie aufgelöst wird (Leuchten)
             let tempRowCounts = Array(rows).fill(0);
             let tempColCounts = Array(cols).fill(0);
             
@@ -848,7 +853,7 @@ document.addEventListener('pointerup', (e) => {
 
     if (currentTargetRow !== -1 && currentTargetCol !== -1) {
         const shapeData = shapeDefinitions[draggedShapeKey];
-        const activeColor = activeShape.dataset.color;
+        const activeColor = activeShape.dataset.color; // Hier wird die Farbe oder das Bild final abgelegt
         
         let blocksPlaced = 0;
         let newlyPlacedCells = [];
@@ -864,7 +869,7 @@ document.addEventListener('pointerup', (e) => {
         }
         
         updateScore(blocksPlaced * 1);
-        renderBoard();
+        renderBoard(); // Hier wird das Bild einmalig sauber in das Grid geladen
         activeShape.style.visibility = 'hidden';
         SoundEngine.playPlace();
         
@@ -887,8 +892,8 @@ document.addEventListener('pointerup', (e) => {
     draggedShapeKey = null;
     currentTargetRow = -1;
     currentTargetCol = -1;
-    lastPreviewRow = -1; // Reset
-    lastPreviewCol = -1; // Reset
+    lastPreviewRow = -1; 
+    lastPreviewCol = -1; 
     clearPreview();
 });
 
