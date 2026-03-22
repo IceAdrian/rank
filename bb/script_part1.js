@@ -19,7 +19,7 @@ const rows = 8, cols = 8;
 let boardState = Array(rows).fill().map(() => Array(cols).fill(null));
 let gameStarted = false;
 let isAnimating = false;
-let hasFlown67 = false;
+
 
 // --- DOM ELEMENTE (VERKNÜPFUNGEN ZUM HTML) ---
 const rankedSetupScreen = document.getElementById('ranked-setup-screen');
@@ -182,16 +182,7 @@ function showBackupStatus(msg, isError = false) {
     }, 4000);
 }
 
-function triggerMemeFlight() {
-    if(typeof memeBase64 !== 'undefined'){
-        const img = document.createElement('img');
-        img.src = memeBase64; 
-        img.className = 'flying-meme';
-        document.body.appendChild(img);
-        
-        setTimeout(() => { img.remove(); }, 3000);
-    }
-}
+
 
 function updateComboUI() {
     if (currentCombo > 0) {
@@ -209,11 +200,7 @@ function updateScore(points) {
     currentScore += points;
     const targetScore = currentScore;
 
-    if (!hasFlown67 && currentScore >= 67) {
-        hasFlown67 = true;
-        if (document.getElementById('toggle-meme').checked) triggerMemeFlight();
-    }
-    
+
     if (scoreAnimationId) cancelAnimationFrame(scoreAnimationId);
     let startTimestamp = null;
     const duration = 2000;
