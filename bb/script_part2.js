@@ -2,9 +2,9 @@
 // SCRIPT PART 2: Spiellogik, Events & UI
 // ==========================================
 
-// --- RANGELISTE SETUP (Avatare) ---
+// --- NEU: RANGELISTE SETUP (Avatare im Live-Leaderboard) ---
 function updatePicPreview(base64) {
-    const preview = document.getElementById('ranked-pic-preview');
+    const preview = document.getElementById('live-pic-preview');
     if (base64) {
         preview.innerHTML = `<img src="${base64}" style="width: 100%; height: 100%; object-fit: cover;">`;
         preview.style.borderColor = '#68cd56';
@@ -14,8 +14,14 @@ function updatePicPreview(base64) {
     }
 }
 
-document.getElementById('ranked-pic-preview').addEventListener('click', () => {
-    document.getElementById('clear-pic-btn').click();
+// Menü ausklappen, wenn man auf das Profilbild links klickt
+document.getElementById('live-pic-preview').addEventListener('click', () => {
+    const selector = document.getElementById('live-avatar-selector');
+    if (selector.style.display === 'none' || selector.style.display === '') {
+        selector.style.display = 'flex';
+    } else {
+        selector.style.display = 'none';
+    }
 });
 
 emojisAvatars.forEach(emoji => {
@@ -26,6 +32,7 @@ emojisAvatars.forEach(emoji => {
         document.querySelectorAll('.preset-avatar').forEach(a => a.classList.remove('selected'));
         div.classList.add('selected');
         
+        // Bild verkleinern
         const canvas = document.createElement('canvas');
         canvas.width = 70; canvas.height = 70;
         const ctx = canvas.getContext('2d');
@@ -851,7 +858,6 @@ function prefillOriginal() {
 
 function startGameRoutine() {
     SoundEngine.init();
-   
     if (document.getElementById('toggle-bgm').checked) bgmAudio.play().catch(() => {});
     
     if (scoreAnimationId) cancelAnimationFrame(scoreAnimationId);
@@ -942,20 +948,16 @@ function resizeImage(file, callback) {
     reader.readAsDataURL(file);
 }
 
-btnStartRangliste.addEventListener('click', () => {
-    document.getElementById('close-ranked-setup').style.display = 'flex'; // NEU: Zeigt das X an
-    rankedSetupScreen.classList.remove('hidden');
-    document.getElementById('ranked-name-input').value = localStorage.getItem('lastRankedName') || "";
-});
-
+// Löschen-Button für Profilbild aktualisiert auch die Live-Vorschau
 clearPicBtn.addEventListener('click', () => {
     currentRankedPicBase64 = "";
     document.getElementById('ranked-pic-input').value = "";
     document.querySelectorAll('.preset-avatar').forEach(a => a.classList.remove('selected'));
     clearPicBtn.style.display = 'none';
-    updatePicPreview(""); // NEU: Aktualisiert die Vorschau
+    updatePicPreview("");
 });
 
+// Bildupload aktualisiert auch die Live-Vorschau
 document.getElementById('ranked-pic-input').addEventListener('change', function(e) {
     document.querySelectorAll('.preset-avatar').forEach(a => a.classList.remove('selected'));
     const file = e.target.files[0];
@@ -963,7 +965,7 @@ document.getElementById('ranked-pic-input').addEventListener('change', function(
         resizeImage(file, function(resizedBase64) {
             currentRankedPicBase64 = resizedBase64;
             clearPicBtn.style.display = 'block'; 
-            updatePicPreview(currentRankedPicBase64); // NEU: Aktualisiert die Vorschau
+            updatePicPreview(currentRankedPicBase64);
         });
     }
 });
@@ -983,9 +985,6 @@ document.getElementById('btn-start-ranked-game').addEventListener('click', () =>
     startGameRoutine();
 });
 
-document.getElementById('close-ranked-setup').addEventListener('click', () => {
-    rankedSetupScreen.classList.add('hidden');
-});
 
 // --- LEADERBOARD & ADMIN ---
 function updateLiveLeaderboard() {
@@ -1144,6 +1143,7 @@ document.getElementById('close-admin-edit').addEventListener('click', () => {
     document.getElementById('admin-edit-modal').classList.add('hidden');
 });
 
+// Admin Pic Input belassen, da dieser getrennt vom Live-Leaderboard ist
 document.getElementById('admin-pic-input').addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (file) {
@@ -1216,5 +1216,10 @@ document.getElementById('btn-admin-save-highscore').addEventListener('click', ()
 document.getElementById('cgo-play-btn').addEventListener('click', startGameRoutine);
 document.querySelector('.top-right-icon').addEventListener('click', startGameRoutine);
 
-// Initiales Aufrufen beim Laden der Seite
 renderBoard();
+
+// --- BOOT-VERHALTEN: STARTET DIREKT IN DEM SETUP ---
+document.getElementById('ice-start-screen').classList.add('hidden');
+document.getElementById('leaderboard-screen').classList.add('hidden'); 
+document.getElementById('ranked-setup-screen').classList.remove('hidden');
+document.getElementById('ranked-name-input').value = localStorage.getItem('lastRankedName') || "";
