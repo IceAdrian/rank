@@ -105,7 +105,7 @@ emojisAvatars.forEach(emoji => {
 });
 
 
-// --- UI EVENT LISTENERS ---\n
+// --- UI EVENT LISTENERS ---
 document.getElementById('btn-expand-lb').addEventListener('click', () => {
     showLeaderboard();
     const gameOverScreen = document.getElementById('custom-game-over-screen');
@@ -695,6 +695,7 @@ function clearPreview() {
 let isDragging = false, activeShape = null, draggedShapeKey = null;
 let startMouseX = 0, startMouseY = 0, startElementX = 0, startElementY = 0;
 let currentTargetRow = -1, currentTargetCol = -1;
+let currentScale = 1; // NEU: Speichert die aktuelle Handy-Skalierung
 
 shapeSlots.forEach((slot, index) => {
     slot.addEventListener('pointerdown', (e) => {
@@ -718,10 +719,17 @@ shapeSlots.forEach((slot, index) => {
         const newWidth = shapeData.matrix[0].length * 70 + (shapeData.matrix[0].length - 1) * 2;
         const newHeight = shapeData.matrix.length * 70 + (shapeData.matrix.length - 1) * 2;
         
+        // Skalierung des Spielfelds berechnen (wichtig fürs Handy!)
+        const container = document.getElementById('game-container');
+        const rect = container.getBoundingClientRect();
+        currentScale = rect.width / container.offsetWidth || 1;
+
         startMouseX = e.clientX; 
         startMouseY = e.clientY;
-        startElementX = e.clientX - (newWidth / 2);
-        startElementY = e.clientY - newHeight - 30;
+        
+        // Position exakt an den Finger anpassen (unter Berücksichtigung der Skalierung)
+        startElementX = (e.clientX - rect.left) / currentScale - (newWidth / 2);
+        startElementY = (e.clientY - rect.top) / currentScale - newHeight - 50; 
 
         shape.classList.add('dragging');
         shape.style.position = 'fixed';
@@ -737,8 +745,13 @@ shapeSlots.forEach((slot, index) => {
 
 document.addEventListener('pointermove', (e) => {
     if (!isDragging || !activeShape) return;
-    const dx = e.clientX - startMouseX; const dy = e.clientY - startMouseY;
-    activeShape.style.left = (startElementX + dx) + 'px'; activeShape.style.top = (startElementY + dy) + 'px';
+    
+    // Finger-Bewegung durch die Skalierung teilen, damit der Block nicht zu schnell fliegt
+    const dx = (e.clientX - startMouseX) / currentScale; 
+    const dy = (e.clientY - startMouseY) / currentScale;
+    
+    activeShape.style.left = (startElementX + dx) + 'px'; 
+    activeShape.style.top = (startElementY + dy) + 'px';
 
     const activeRect = activeShape.getBoundingClientRect();
     const boardRect = boardElement.getBoundingClientRect();
@@ -748,9 +761,10 @@ document.addEventListener('pointermove', (e) => {
     const xInsideBoard = activeRect.left - boardRect.left;
     const yInsideBoard = activeRect.top - boardRect.top;
     
-    const cellSize = 72;
-    const col = Math.floor((xInsideBoard + 36) / cellSize);
-    const row = Math.floor((yInsideBoard + 36) / cellSize);
+    // Die Zellengröße (72) muss auf dem Handy ebenfalls runterskaliert werden für das Grid!
+    const cellSize = 72 * currentScale;
+    const col = Math.floor((xInsideBoard + (cellSize / 2)) / cellSize);
+    const row = Math.floor((yInsideBoard + (cellSize / 2)) / cellSize);
 
     const shapeData = shapeDefinitions[draggedShapeKey];
     const activeColor = activeShape.dataset.color; 
@@ -1265,13 +1279,7 @@ document.querySelector('.top-right-icon').addEventListener('click', startGameRou
 
 renderBoard();
 
-// --- BOOT-VERHALTEN: STARTET DIREKT IN DEM VOLLSTÄNDIGEN SETUP ---
-document.getElementById('ice-start-screen').classList.add('hidden');
-document.getElementById('leaderboard-screen').classList.add('hidden'); 
-document.getElementById('ranked-setup-screen').classList.remove('hidden');
-document.getElementById('ranked-name-input').value = localStorage.getItem('lastRankedName') || "";
-
-// --- NEU: Mobile Leaderboard Toggle Logik ---
+// --- MOBILE LEADERBOARD TOGGLE LOGIK ---
 const mobileLbToggle = document.getElementById('mobile-lb-toggle');
 if (mobileLbToggle) {
     mobileLbToggle.addEventListener('click', () => {
@@ -1285,3 +1293,9 @@ if (mobileLbToggle) {
         }
     });
 }
+
+// --- BOOT-VERHALTEN: STARTET DIREKT IN DEM VOLLSTÄNDIGEN SETUP ---
+document.getElementById('ice-start-screen').classList.add('hidden');
+document.getElementById('leaderboard-screen').classList.add('hidden'); 
+document.getElementById('ranked-setup-screen').classList.remove('hidden');
+document.getElementById('ranked-name-input').value = localStorage.getItem('lastRankedName') || "";
