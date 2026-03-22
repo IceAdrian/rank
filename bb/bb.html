@@ -19,7 +19,7 @@
         <div id="live-lb-list"></div>
     </div>
 
-    <div id="ice-start-screen" class="ice-start-screen">
+    <div id="ice-start-screen" class="ice-start-screen hidden">
         <div class="logo-container">
             <div class="logo-ice">
                 <span class="logo-crown">👑</span>
@@ -47,6 +47,10 @@
     </div>
 
     <div class="header">
+        <button id="btn-back-to-ranking" style="background-color: #facc15; color: #1d61c2; border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-right: auto; box-shadow: 0 4px 0 #d97706; font-size: 14px;">
+            🏆 Zurück zur Rangliste
+        </button>
+        
         <div class="highscore" id="highscore-display">👑 0</div>
         <div class="settings-icon" id="settings-btn">⚙️</div>
     </div>
@@ -164,25 +168,26 @@
 
             <div class="master-fs-item mode-selector-container">
                 <div style="width: 100%; text-align: center;"><span>Spielmodus</span></div>
+                
                 <div class="mode-options">
                     <div class="mode-option active" id="mode-standard">
                         <div class="mode-preview standard-preview"></div>
-                        <span>Standard</span>
+                        <span>Premium</span>
                     </div>
 
                     <div class="mode-option" id="mode-adrian">
                         <div class="mode-preview color-adrian"></div>
-                        <span>Adrian Modus</span>
+                        <span>Express</span>
                     </div>
 
                     <div class="mode-option" id="mode-ahmad">
                         <div class="mode-preview color-image"></div>
-                        <span>Ahmad Modus</span>
+                        <span>Bonus</span>
                     </div>
                    
                     <div class="mode-option" id="mode-emanuel">
                         <div class="mode-preview color-emanuel"></div>
-                        <span>Emanuel Modus</span>
+                        <span>VIP</span>
                     </div>
                  </div>
             </div>
@@ -272,7 +277,7 @@
         </div>
     </div>
 
-    <div id="leaderboard-screen" class="master-fullscreen hidden" style="z-index: 7000;">
+    <div id="leaderboard-screen" class="master-fullscreen" style="z-index: 7000;">
         <div class="master-fs-header">Top Spieler</div>
         <div class="master-fs-content" id="leaderboard-list" style="overflow-y: auto; max-height: 60vh; padding-right: 10px;">
         </div>
