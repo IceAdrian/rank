@@ -565,13 +565,7 @@
 
     allTeachers.sort((a, b) => getLastName(a.name).localeCompare(getLastName(b.name)));
 
-    const savedCustomData = JSON.parse(localStorage.getItem('lehrerCustomData'));
-    if (savedCustomData) {
-        allTeachers.forEach(t => { if (savedCustomData[t.id]) t.name = savedCustomData[t.id].name; });
-        allTeachers.sort((a, b) => getLastName(a.name).localeCompare(getLastName(b.name)));
-    }
-
-    // --- Profil Logik ---
+    // --- Profil Logik (Bleibt LOKAL, da Nutzer-spezifisch) ---
     let userProfile = { grade: "Unbekannt", gender: "Unbekannt" };
 
     function initProfileButtons() {
@@ -594,7 +588,7 @@
     }
 
     // --- Runden Historie ---
-    let roundHistory = JSON.parse(localStorage.getItem('lehrerRankingHistory')) || [];
+    let roundHistory = []; // Wird jetzt vom Server geladen
     let currentSessionDuelsLog = []; 
     let voteHistoryStack = []; 
 
@@ -613,7 +607,6 @@
         };
         roundHistory.unshift(roundData); 
         if (roundHistory.length > 50) roundHistory.pop(); 
-        localStorage.setItem('lehrerRankingHistory', JSON.stringify(roundHistory));
     }
 
     function toggleHistoryDetails(id) {
@@ -638,11 +631,8 @@
             }
         }
         
-        // --- NEU: Änderung hier von LocalStorage zu Server ---
-        saveServerStats();
-        
         roundHistory.splice(roundIndex, 1);
-        localStorage.setItem('lehrerRankingHistory', JSON.stringify(roundHistory));
+        saveServerStats(); // NEU: Sendet Löschung ans Backend
         renderAdminGrid(); renderHistoryList();
     }
 
@@ -682,7 +672,7 @@
     function clearHistory() {
         if(confirm("Möchtest du den gesamten Runden-Verlauf wirklich löschen? (Die All-Time Punkte bleiben dabei erhalten, nur die Historie verschwindet)")) {
             roundHistory = [];
-            localStorage.setItem('lehrerRankingHistory', JSON.stringify(roundHistory));
+            saveServerStats(); // NEU: Sendet Löschung ans Backend
             renderHistoryList();
         }
     }
@@ -692,14 +682,29 @@
     let currentSortType = 'winrate'; let sortAscending = false; 
     let isAllTimeOnlyMode = false; let duelsPlayed = 0; 
 
-    // --- NEU: Globale Stats über Cloudflare anstatt LocalStorage ---
+    // --- GLOBALE STATS & DATEN (Vom Server) ---
     let globalStats = {};
 
     async function loadServerStats() {
         try {
             const response = await fetch('/api/stats');
             if (response.ok) {
-                globalStats = await response.json();
+                const data = await response.json();
+                
+                // Prüfen, ob es das neue "große Paket" ist
+                if(data.stats) {
+                    globalStats = data.stats;
+                    roundHistory = data.history || [];
+                    const customNames = data.customData || {};
+                    
+                    // Geänderte Namen anwenden
+                    allTeachers.forEach(t => { if (customNames[t.id]) t.name = customNames[t.id].name; });
+                    allTeachers.sort((a, b) => getLastName(a.name).localeCompare(getLastName(b.name)));
+                } else {
+                    // Falls noch alte Daten (nur Stats) auf dem Server liegen
+                    globalStats = data || {};
+                    roundHistory = [];
+                }
             } else {
                 globalStats = {}; 
             }
@@ -716,13 +721,26 @@
     }
 
     async function saveServerStats() {
+        // Bereite Custom-Namen zum Speichern vor
+        let customDataToSave = {};
+        allTeachers.forEach(teacher => {
+            customDataToSave[teacher.id] = { name: teacher.name };
+        });
+
+        // Packe alles in ein großes Paket
+        const payload = {
+            stats: globalStats,
+            history: roundHistory,
+            customData: customDataToSave
+        };
+
         try {
             await fetch('/api/stats', {
                 method: 'POST',
-                body: JSON.stringify(globalStats),
+                body: JSON.stringify(payload),
                 headers: { 'Content-Type': 'application/json' }
             });
-            console.log("Erfolgreich auf Cloudflare gespeichert!");
+            console.log("Erfolgreich auf Cloudflare (Paket) gespeichert!");
         } catch (e) {
             console.error("Fehler beim Speichern auf dem Server", e);
         }
@@ -751,7 +769,7 @@
 
     function clearSearch() { document.getElementById('search-input').value = ''; filterTeachers(); }
 
-    // Admin & Secret Logic - NEUES GEHEIMES HASH-VERFAHREN
+    // Admin & Secret Logic
     let statsClicks = 0; let statsTimer;
     document.getElementById('trigger-stats').addEventListener('click', () => {
         statsClicks++; clearTimeout(statsTimer);
@@ -780,8 +798,7 @@
                     for(let i = 0; i < pwd.length; i++) {
                         h = Math.imul(31, h) + pwd.charCodeAt(i) | 0;
                     }
-                    
-                    if (h === 1568) {
+                    if (h === 1568) { // Passwort ist "11"
                         openAdmin(); 
                     } else {
                         alert("Falsches Passwort! Zugriff verweigert.");
@@ -797,8 +814,6 @@
     function resetAllTimeStats() {
         if(confirm("ACHTUNG: Möchtest du wirklich ALLE All-Time Statistiken auf 0 setzen?")) {
             allTeachers.forEach(t => { globalStats[t.id] = { wins: 0, losses: 0, ties: 0, diff: 0, winrate: 0 }; });
-            
-            // --- NEU: Änderung hier von LocalStorage zu Server ---
             saveServerStats(); 
             renderAdminGrid(); alert("Zurückgesetzt!");
         }
@@ -818,21 +833,18 @@
         });
     }
     function saveAdminChanges() {
-        let customDataToSave = {};
         allTeachers.forEach(teacher => {
-            teacher.name = document.getElementById(`admin-name-${teacher.id}`).value; customDataToSave[teacher.id] = { name: teacher.name };
+            teacher.name = document.getElementById(`admin-name-${teacher.id}`).value;
             let w = parseInt(document.getElementById(`admin-wins-${teacher.id}`).value) || 0; let l = parseInt(document.getElementById(`admin-losses-${teacher.id}`).value) || 0; let t = parseInt(document.getElementById(`admin-ties-${teacher.id}`).value) || 0;
             globalStats[teacher.id] = { wins: w, losses: l, ties: t, diff: w - l, winrate: (w+l+t)>0 ? (w/(w+l+t))*100 : 0 };
         });
-        localStorage.setItem('lehrerCustomData', JSON.stringify(customDataToSave)); 
         
-        // --- NEU: Änderung hier von LocalStorage zu Server ---
-        saveServerStats();
-        
-        allTeachers.sort((a, b) => getLastName(a.name).localeCompare(getLastName(b.name))); renderTeacherSelectionGrid(); closeAdmin(); alert("Gespeichert!");
+        allTeachers.sort((a, b) => getLastName(a.name).localeCompare(getLastName(b.name))); 
+        saveServerStats(); // Speichert nun auch die Namen ab
+        renderTeacherSelectionGrid(); closeAdmin(); alert("Gespeichert!");
     }
 
-    // --- NEU: Window Onload mit await ---
+    // --- Window Onload mit await ---
     window.onload = async () => { 
         initProfileButtons(); 
         await loadServerStats();
@@ -1032,9 +1044,8 @@
         });
 
         if (duelsPlayed > 0) {
-            // --- NEU: Änderung hier von LocalStorage zu Server ---
-            saveServerStats();
-            saveRoundToHistory(sessionDelta); 
+            saveRoundToHistory(sessionDelta); // ERST den Verlauf aktualisieren...
+            saveServerStats(); // ...DANN das gesamte Paket an Cloudflare senden
         }
     }
 
@@ -1140,14 +1151,18 @@
 
     function appendTableRow(tbody, teacher, index, isGlobal) {
         const tr = document.createElement('tr');
-        if(index === 0) tr.classList.add('rank-row-1');
-        if(index === 1) tr.classList.add('rank-row-2');
-        if(index === 2) tr.classList.add('rank-row-3');
+        if(!sortAscending && (currentSortType === 'winrate' || currentSortType === 'wins' || currentSortType === 'diff')) {
+            if(index === 0) tr.classList.add('rank-row-1');
+            if(index === 1) tr.classList.add('rank-row-2');
+            if(index === 2) tr.classList.add('rank-row-3');
+        }
 
         let prefix = `${index + 1}.`;
-        if(index === 0) prefix = "🥇";
-        if(index === 1) prefix = "🥈";
-        if(index === 2) prefix = "🥉";
+        if(!sortAscending && (currentSortType === 'winrate' || currentSortType === 'wins' || currentSortType === 'diff')) {
+            if(index === 0) prefix = "🥇";
+            if(index === 1) prefix = "🥈";
+            if(index === 2) prefix = "🥉";
+        }
 
         let wins = isGlobal ? teacher.globalWins : teacher.wins;
         let losses = isGlobal ? teacher.globalLosses : teacher.losses;
