@@ -384,22 +384,36 @@
             .stat-wins, .stat-losses { width: 30px; text-align: center; }
             .stat-quote { width: 35px; text-align: right; }
 
-            .full-list-main { padding: 15px 5px; border-radius: 10px; overflow-x: auto;}
-            .results-table th, .results-table td { padding: 8px 2px; font-size: 12px; }
+            /* --- Haupttabelle Mobile Fix - KEIN SCROLLEN MEHR! --- */
+            .full-list-main { padding: 15px 5px; border-radius: 10px; overflow-x: visible; }
+            .results-table { min-width: 100%; table-layout: fixed; margin-left: -2px; }
             
-            /* Breiten angepasst, damit die Quote (100%) nie abgeschnitten wird */
-            .results-table th:nth-child(1), .results-table td:nth-child(1) { width: 30px !important; min-width: 30px; } 
-            .results-table th:nth-child(2), .results-table td:nth-child(2) { width: auto !important; max-width: 80px; } 
-            .results-table td.name-col { font-size: 12px; padding-left: 4px; }
-            .results-table tr.rank-row-1 td.name-col { font-size: 14px; }
+            /* Text-Umbruch erlauben, damit Namen mehrzeilig werden können */
+            .results-table th, .results-table td { 
+                padding: 8px 1px; 
+                font-size: 11px; 
+                white-space: normal; /* Erlaubt Umbruch */
+                word-wrap: break-word; 
+                overflow: visible; 
+            }
             
+            /* Genaue Spaltenbreiten, um alles auf den Bildschirm zu zwingen */
+            .results-table th:nth-child(1), .results-table td:nth-child(1) { width: 22px !important; } /* Rang/Medaille */
+            
+            /* Name darf den gesamten restlichen Platz nutzen und bricht um */
+            .results-table th:nth-child(2), .results-table td:nth-child(2) { width: auto !important; text-align: left; line-height: 1.2; } 
+            .results-table td.name-col { font-size: 12px; padding-left: 2px; }
+            .results-table tr.rank-row-1 td.name-col { font-size: 13px; font-weight: 800; }
+            
+            /* Statistik-Spalten stark komprimiert */
             .results-table th:nth-child(3), .results-table td:nth-child(3),
             .results-table th:nth-child(4), .results-table td:nth-child(4),
-            .results-table th:nth-child(5), .results-table td:nth-child(5),
-            .results-table th:nth-child(6), .results-table td:nth-child(6) { width: 28px !important; } 
+            .results-table th:nth-child(5), .results-table td:nth-child(5) { width: 24px !important; } 
             
-            /* HIER WURDE DIE QUOTE VERBREITERT: */
-            .results-table th:nth-child(7), .results-table td:nth-child(7) { width: 55px !important; min-width: 55px; } 
+            .results-table th:nth-child(6), .results-table td:nth-child(6) { width: 26px !important; } /* Diff */
+            
+            /* Quote hat festen Platz für 100% */
+            .results-table th:nth-child(7), .results-table td:nth-child(7) { width: 44px !important; font-size: 13px !important; }
             
             .hide-mobile { display: none; } 
         }
@@ -571,7 +585,7 @@
         localStorage.setItem('lehrerRankingDarkMode', isDarkMode);
     }
 
-    // --- SHARE LOGIK (NEU) ---
+    // --- SHARE LOGIK (Mit neuem Spruch) ---
     async function shareRanking() {
         const shareBtn = document.getElementById('btn-share');
         const originalText = shareBtn.innerText;
@@ -589,7 +603,8 @@
 
             canvas.toBlob(async (blob) => {
                 const file = new File([blob], 'mein-mpg-ranking.png', { type: 'image/png' });
-                const shareText = "Ranke auch Lehrer vom MPG\n\nhttps://mpgranking.pages.dev/";
+                // NEUER TEXT HIER:
+                const shareText = "🏆 Wer ist der beste Lehrer am MPG?\nIch habe gerade mein persönliches Ranking erstellt!\n\n👉 Mach mit und stimme jetzt ab: https://mpgranking.pages.dev/ 🚀";
                 
                 // Für Mobile (WhatsApp, Insta, etc.)
                 if (navigator.canShare && navigator.canShare({ files: [file] })) {
