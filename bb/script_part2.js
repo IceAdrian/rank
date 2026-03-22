@@ -1200,3 +1200,14 @@ document.querySelector('.top-right-icon').addEventListener('click', startGameRou
 
 // Initiales Aufrufen beim Laden der Seite
 renderBoard();
+
+// --- NEU: Button-Funktion für die permanente Ranking-Taste (Weiterleitung zur Hauptseite) ---
+document.getElementById('btn-back-to-ranking').addEventListener('click', () => {
+    window.location.href = '../index.html';
+});
+
+// --- NEU: Direkt in der Rangliste starten ---
+// Versteckt den normalen Startbildschirm beim Laden der Seite
+document.getElementById('ice-start-screen').classList.add('hidden');
+// Zeigt sofort das Ranking-Overlay an
+showLeaderboard();
