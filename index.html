@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Lehrerranking MPG</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         /* Modernes Basis-Design */
         body { 
@@ -208,7 +209,7 @@
             to { box-shadow: 0 0 35px rgba(255, 215, 0, 0.35); }
         }
         
-        .results-table { width: 100%; border-collapse: separate; border-spacing: 0 6px; margin-top: 10px; table-layout: fixed; }
+        .results-table { width: 100%; border-collapse: separate; border-spacing: 0 6px; margin-top: 10px; table-layout: fixed; min-width: 400px; }
         
         .results-table th, .results-table td {
             box-sizing: border-box; padding: 14px 8px; text-align: center; vertical-align: middle; 
@@ -271,7 +272,7 @@
         .history-item:last-child { border-bottom: none; }
         .history-date { color: #007bff; font-weight: bold; }
 
-        /* --- DARK MODE STYLES (GOLD & GLOW EDITION) --- */
+        /* --- DARK MODE STYLES --- */
         body.dark-mode { background: #121212; color: #e0e0e0; }
         body.dark-mode .container { background: #1e1e1e; box-shadow: 0 10px 50px rgba(0,0,0,0.8); }
         body.dark-mode h2, body.dark-mode h3 { color: #f8f9fa; }
@@ -284,23 +285,15 @@
         body.dark-mode #search-input:focus { border-color: #ffd700; box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); }
         body.dark-mode #mpg-blast-link { box-shadow: 0 4px 10px rgba(0,0,0,0.5); border: 1px solid #ff4b2b;}
         
-        /* Lehrer Auswahl - Gold Glow */
         body.dark-mode .teacher-item.male { background: #1c2b3a; border-color: #2a3f54; }
         body.dark-mode .teacher-item.female { background: #3a1c27; border-color: #542a3a; }
         body.dark-mode .teacher-lastname { color: #f8f9fa; }
-        
         body.dark-mode .teacher-item.male.selected,
-        body.dark-mode .teacher-item.female.selected { 
-            background: rgba(255, 215, 0, 0.1); 
-            border-color: #ffd700; 
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); 
-            transform: translateY(-2px);
-        }
+        body.dark-mode .teacher-item.female.selected { background: rgba(255, 215, 0, 0.1); border-color: #ffd700; box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); transform: translateY(-2px); }
 
         body.dark-mode .progress-container { background: #333; }
         body.dark-mode .progress-bar-fill { background: linear-gradient(90deg, #b8860b, #ffd700); box-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
         
-        /* Duell Arena - Gold Hover & Vote */
         body.dark-mode .card { background: #242424; border-color: #333; transition: all 0.3s ease; }
         body.dark-mode .card:hover { box-shadow: 0 0 25px rgba(255, 215, 0, 0.2); border-color: rgba(255, 215, 0, 0.4); transform: translateY(-4px); }
         
@@ -312,30 +305,11 @@
         
         body.dark-mode .vs { color: #666; text-shadow: 0 0 10px rgba(255,255,255,0.1); }
         
-        /* Goldener Vote-Button in Dark Mode */
-        body.dark-mode .btn-vote { 
-            background: linear-gradient(135deg, #3a321a, #2a2412); 
-            color: #ffd700; 
-            border: 1px solid #b8860b; 
-            box-shadow: inset 0 0 10px rgba(255,215,0,0.1);
-            transition: all 0.3s;
-        }
-        body.dark-mode .btn-vote:hover { 
-            background: linear-gradient(135deg, #ffd700, #ffb300); 
-            color: #121212; 
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); 
-            border-color: #fff;
-        }
+        body.dark-mode .btn-vote { background: linear-gradient(135deg, #3a321a, #2a2412); color: #ffd700; border: 1px solid #b8860b; box-shadow: inset 0 0 10px rgba(255,215,0,0.1); transition: all 0.3s; }
+        body.dark-mode .btn-vote:hover { background: linear-gradient(135deg, #ffd700, #ffb300); color: #121212; box-shadow: 0 0 20px rgba(255, 215, 0, 0.6); border-color: #fff; }
 
-        /* Goldener Blitz beim Abstimmen */
-        body.dark-mode .flash-green { 
-            box-shadow: 0 0 40px rgba(255, 215, 0, 0.7) !important; 
-            border-color: #ffd700 !important; 
-            transform: scale(1.05);
-            background: rgba(255, 215, 0, 0.05);
-        }
+        body.dark-mode .flash-green { box-shadow: 0 0 40px rgba(255, 215, 0, 0.7) !important; border-color: #ffd700 !important; transform: scale(1.05); background: rgba(255, 215, 0, 0.05); }
         
-        /* Ergebnisse in Gold */
         body.dark-mode .top10-sidebar { background: #2a281e; border-color: #ffd700; box-shadow: 0 0 20px rgba(255, 215, 0, 0.15); }
         body.dark-mode .top10-sidebar h3 { color: #ffd700; border-bottom-color: #665500; text-shadow: 0 0 10px rgba(255,215,0,0.3); }
         body.dark-mode .top10-list li { background: #2c2c2c; border-color: #444; color: #e0e0e0; }
@@ -345,15 +319,8 @@
         
         body.dark-mode .full-list-main { background: #1e1e1e; border-color: #444; }
         
-        body.dark-mode .all-time-glow {
-            border: 3px solid #ffd700 !important;
-            background: #1e1e1e !important;
-            animation: darkGoldGlow 2.5s infinite alternate;
-        }
-        @keyframes darkGoldGlow {
-            from { box-shadow: 0 0 10px rgba(255, 215, 0, 0.1); }
-            to { box-shadow: 0 0 30px rgba(255, 215, 0, 0.4); }
-        }
+        body.dark-mode .all-time-glow { border: 3px solid #ffd700 !important; background: #1e1e1e !important; animation: darkGoldGlow 2.5s infinite alternate; }
+        @keyframes darkGoldGlow { from { box-shadow: 0 0 10px rgba(255, 215, 0, 0.1); } to { box-shadow: 0 0 30px rgba(255, 215, 0, 0.4); } }
 
         body.dark-mode .results-table th { background: #2c2c2c; color: #adb5bd; border-color: #444; }
         body.dark-mode .results-table th.sortable:not(.active-sort):hover { background: #3a3a3a; color: #fff; }
@@ -375,31 +342,19 @@
         
         /* --- MOBILE OPTIMIERUNG --- */
         @media (max-width: 768px) {
-            body { 
-                padding: 0; 
-                background: #fdfbfb; 
-            }
-            body.dark-mode {
-                background: #1e1e1e;
-            }
+            body { padding: 0; background: #fdfbfb; }
+            body.dark-mode { background: #1e1e1e; }
             
             .container { 
-                width: 100%; 
-                max-width: 100%; 
-                border-radius: 0; 
-                margin: 0; 
-                padding: 70px 10px 30px 10px; 
-                box-shadow: none; 
-                border: none;
+                width: 100%; max-width: 100%; border-radius: 0; margin: 0; 
+                padding: 70px 10px 30px 10px; box-shadow: none; border: none;
             }
 
             h2 { font-size: 22px; margin-bottom: 15px; }
 
-            /* Top Buttons neu positioniert */
             #mpg-blast-link { top: 15px; left: 15px; padding: 8px 14px; font-size: 13px; }
             #dark-mode-toggle { top: 15px; right: 15px; width: 38px; height: 38px; font-size: 18px; }
 
-            /* Lehrer Auswahl: Zwingend 3 Spalten nebeneinander */
             .controls { flex-direction: column; width: 100%; gap: 8px; }
             .controls button { width: 100%; margin: 0; }
             .teacher-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
@@ -407,7 +362,6 @@
             .teacher-prefix { font-size: 10px; }
             .teacher-lastname { font-size: 12px; }
 
-            /* Duell Arena gestapelt */
             .battle-arena { flex-direction: column; gap: 15px; margin-top: 15px; align-items: stretch; }
             .card { width: 100%; max-width: 100%; padding: 15px; box-sizing: border-box; }
             
@@ -422,7 +376,6 @@
             .action-buttons { flex-direction: column; gap: 10px; margin-top: 25px; }
             .action-buttons button { width: 100%; padding: 14px; margin: 0; font-size: 15px; }
 
-            /* Top 10 Mobile Fix */
             .top10-sidebar { padding: 15px 10px; }
             .top10-list .rank { font-size: 14px; width: 30px; }
             .top10-list li.rank-1 .rank { font-size: 18px; }
@@ -431,22 +384,22 @@
             .stat-wins, .stat-losses { width: 30px; text-align: center; }
             .stat-quote { width: 35px; text-align: right; }
 
-            /* Haupttabelle Mobile Fix - Erzwingt Platz für Spalten */
-            .full-list-main { padding: 15px 5px; border-radius: 10px; }
+            .full-list-main { padding: 15px 5px; border-radius: 10px; overflow-x: auto;}
             .results-table th, .results-table td { padding: 8px 2px; font-size: 12px; }
             
-            /* Erzwinge genaue Breiten per CSS auf Mobile, damit nichts wegbricht */
-            .results-table th:nth-child(1), .results-table td:nth-child(1) { width: 30px !important; min-width: 30px; } /* Rang/Medaille */
-            .results-table th:nth-child(2), .results-table td:nth-child(2) { width: auto !important; max-width: 80px; } /* Name */
+            /* Breiten angepasst, damit die Quote (100%) nie abgeschnitten wird */
+            .results-table th:nth-child(1), .results-table td:nth-child(1) { width: 30px !important; min-width: 30px; } 
+            .results-table th:nth-child(2), .results-table td:nth-child(2) { width: auto !important; max-width: 80px; } 
             .results-table td.name-col { font-size: 12px; padding-left: 4px; }
             .results-table tr.rank-row-1 td.name-col { font-size: 14px; }
             
             .results-table th:nth-child(3), .results-table td:nth-child(3),
             .results-table th:nth-child(4), .results-table td:nth-child(4),
             .results-table th:nth-child(5), .results-table td:nth-child(5),
-            .results-table th:nth-child(6), .results-table td:nth-child(6) { width: 28px !important; } /* Werte */
+            .results-table th:nth-child(6), .results-table td:nth-child(6) { width: 28px !important; } 
             
-            .results-table th:nth-child(7), .results-table td:nth-child(7) { width: 40px !important; } /* Quote */
+            /* HIER WURDE DIE QUOTE VERBREITERT: */
+            .results-table th:nth-child(7), .results-table td:nth-child(7) { width: 55px !important; min-width: 55px; } 
             
             .hide-mobile { display: none; } 
         }
@@ -586,8 +539,10 @@
                 </table>
             </div>
         </div>
-        <div style="margin-top: 40px;">
-            <button class="btn-success" style="padding: 15px 40px; font-size: 18px;" onclick="location.reload()">Zurück zur Startseite</button>
+
+        <div style="margin-top: 30px; display: flex; flex-direction: column; gap: 15px; align-items: center;">
+            <button class="btn-info" id="btn-share" onclick="shareRanking()" style="padding: 15px 30px; font-size: 18px; width: 100%; max-width: 350px;">📸 Ergebnis teilen</button>
+            <button class="btn-success" style="padding: 15px 30px; font-size: 18px; width: 100%; max-width: 350px;" onclick="location.reload()">Zurück zur Startseite</button>
         </div>
     </div>
 </div>
@@ -614,6 +569,60 @@
             darkModeBtn.innerText = '🌙';
         }
         localStorage.setItem('lehrerRankingDarkMode', isDarkMode);
+    }
+
+    // --- SHARE LOGIK (NEU) ---
+    async function shareRanking() {
+        const shareBtn = document.getElementById('btn-share');
+        const originalText = shareBtn.innerText;
+        shareBtn.innerText = "⏳ Erstelle Bild...";
+        shareBtn.disabled = true;
+
+        try {
+            const elementToShare = document.getElementById('main-list-container');
+            
+            // Screenshot mit html2canvas machen
+            const canvas = await html2canvas(elementToShare, {
+                scale: 2, 
+                backgroundColor: isDarkMode ? '#1e1e1e' : '#ffffff'
+            });
+
+            canvas.toBlob(async (blob) => {
+                const file = new File([blob], 'mein-mpg-ranking.png', { type: 'image/png' });
+                const shareText = "Ranke auch Lehrer vom MPG\n\nhttps://mpgranking.pages.dev/";
+                
+                // Für Mobile (WhatsApp, Insta, etc.)
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        title: 'Mein MPG Lehrer Ranking',
+                        text: shareText,
+                        files: [file]
+                    });
+                } else if (navigator.share) {
+                    // Fallback ohne Bild falls das Handy es nicht erlaubt
+                    await navigator.share({
+                        title: 'Mein MPG Lehrer Ranking',
+                        text: shareText
+                    });
+                } else {
+                    // PC-Fallback: Bild direkt herunterladen
+                    const link = document.createElement('a');
+                    link.download = 'mein-mpg-ranking.png';
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                    alert("Dein Bild wurde heruntergeladen! Teile jetzt einfach den Link: https://mpgranking.pages.dev/");
+                }
+                
+                shareBtn.innerText = originalText;
+                shareBtn.disabled = false;
+            }, 'image/png');
+
+        } catch (err) {
+            console.error(err);
+            alert("Beim Teilen ist ein Fehler aufgetreten.");
+            shareBtn.innerText = originalText;
+            shareBtn.disabled = false;
+        }
     }
 
     // --- DATEN ---
@@ -673,7 +682,7 @@
     }
 
     // --- Runden Historie ---
-    let roundHistory = []; // Wird jetzt vom Server geladen
+    let roundHistory = []; 
     let currentSessionDuelsLog = []; 
     let voteHistoryStack = []; 
 
@@ -691,7 +700,6 @@
             delta: sessionDelta, logs: currentSessionDuelsLog
         };
         roundHistory.unshift(roundData); 
-        // Linit auf 50 Runden wurde hier entfernt, sodass es unbegrenzt weiter speichert
     }
 
     function toggleHistoryDetails(id) {
@@ -717,7 +725,7 @@
         }
         
         roundHistory.splice(roundIndex, 1);
-        saveServerStats(); // NEU: Sendet Löschung ans Backend
+        saveServerStats(); 
         renderAdminGrid(); renderHistoryList();
     }
 
@@ -757,7 +765,6 @@
     function clearHistory() {
         if(confirm("Möchtest du den gesamten Runden-Verlauf wirklich löschen? ACHTUNG: Dabei werden auch alle dazugehörigen Punkte aus der All-Time Statistik abgezogen!")) {
             
-            // Jeden Punkt aus den Runden abziehen
             roundHistory.forEach(round => {
                 if(round.delta) {
                     for(let tId in round.delta) {
@@ -774,9 +781,9 @@
             });
 
             roundHistory = [];
-            saveServerStats(); // Speichert die genullten Stats und den leeren Verlauf
+            saveServerStats(); 
             renderHistoryList();
-            renderAdminGrid(); // Aktualisiert die Zahlen direkt im Admin Panel
+            renderAdminGrid(); 
         }
     }
 
@@ -794,17 +801,14 @@
             if (response.ok) {
                 const data = await response.json();
                 
-                // Prüfen, ob es das neue "große Paket" ist
                 if(data.stats) {
                     globalStats = data.stats;
                     roundHistory = data.history || [];
                     const customNames = data.customData || {};
                     
-                    // Geänderte Namen anwenden
                     allTeachers.forEach(t => { if (customNames[t.id]) t.name = customNames[t.id].name; });
                     allTeachers.sort((a, b) => getLastName(a.name).localeCompare(getLastName(b.name)));
                 } else {
-                    // Falls noch alte Daten (nur Stats) auf dem Server liegen
                     globalStats = data || {};
                     roundHistory = [];
                 }
@@ -824,13 +828,11 @@
     }
 
     async function saveServerStats() {
-        // Bereite Custom-Namen zum Speichern vor
         let customDataToSave = {};
         allTeachers.forEach(teacher => {
             customDataToSave[teacher.id] = { name: teacher.name };
         });
 
-        // Packe alles in ein großes Paket
         const payload = {
             stats: globalStats,
             history: roundHistory,
@@ -872,7 +874,6 @@
 
     function clearSearch() { document.getElementById('search-input').value = ''; filterTeachers(); }
 
-    // Admin & Secret Logic
     let statsClicks = 0; let statsTimer;
     document.getElementById('trigger-stats').addEventListener('click', () => {
         statsClicks++; clearTimeout(statsTimer);
@@ -901,7 +902,7 @@
                     for(let i = 0; i < pwd.length; i++) {
                         h = Math.imul(31, h) + pwd.charCodeAt(i) | 0;
                     }
-                    if (h === 1568) { // Passwort ist "11"
+                    if (h === 1568) { 
                         openAdmin(); 
                     } else {
                         alert("Falsches Passwort! Zugriff verweigert.");
@@ -943,7 +944,7 @@
         });
         
         allTeachers.sort((a, b) => getLastName(a.name).localeCompare(getLastName(b.name))); 
-        saveServerStats(); // Speichert nun auch die Namen ab
+        saveServerStats(); 
         renderTeacherSelectionGrid(); closeAdmin(); alert("Gespeichert!");
     }
 
@@ -1147,8 +1148,8 @@
         });
 
         if (duelsPlayed > 0) {
-            saveRoundToHistory(sessionDelta); // ERST den Verlauf aktualisieren...
-            saveServerStats(); // ...DANN das gesamte Paket an Cloudflare senden
+            saveRoundToHistory(sessionDelta); 
+            saveServerStats(); 
         }
     }
 
