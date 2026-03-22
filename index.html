@@ -166,7 +166,7 @@
         
         .top10-list { list-style: none; padding: 0; margin: 0; }
         .top10-list li {
-            display: flex; align-items: center; justify-content: space-between;
+            display: flex; align-items: center; justify-content: space-between; flex-wrap: nowrap;
             padding: 14px 15px; border: 1px solid #eaedf0; gap: 10px; font-weight: bold;
             border-radius: 12px; margin-bottom: 10px; background: #ffffff; 
             box-shadow: 0 2px 8px rgba(0,0,0,0.02); transition: all 0.3s;
@@ -177,12 +177,16 @@
         .top10-list li.rank-2 { border-left: 5px solid #c0c0c0; margin-bottom: 15px; }
         .top10-list li.rank-3 { border-left: 5px solid #cd7f32; margin-bottom: 20px; }
 
-        .top10-list .rank { font-size: 16px; width: 45px; text-align: left; color: #b8860b; }
+        .top10-list .rank { font-size: 16px; width: 35px; flex-shrink: 0; text-align: left; color: #b8860b; }
         .top10-list li.rank-1 .rank { font-size: 22px; } 
-        .top10-list .name { flex-grow: 1; font-size: 16px; transition: color 0.3s;}
+        
+        .top10-list .name { 
+            flex-grow: 1; font-size: 16px; transition: color 0.3s;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
+        }
         .top10-list li.rank-1 .name { font-size: 18px; color: #855a00; }
         
-        .top10-list .stats { display: flex; gap: 8px; font-size: 14px; padding: 5px 0; align-items: center;}
+        .top10-list .stats { display: flex; gap: 8px; font-size: 14px; padding: 5px 0; align-items: center; flex-shrink: 0;}
         .stat-wins { display: inline-block; width: 45px; text-align: left; color: #28a745; }
         .stat-losses { display: inline-block; width: 45px; text-align: left; color: #dc3545; }
         .stat-quote { display: inline-block; width: 45px; text-align: right; color: #2c3e50; font-weight: 900; }
@@ -373,7 +377,7 @@
         @media (max-width: 768px) {
             body { 
                 padding: 0; 
-                background: #fdfbfb; /* Fallback */
+                background: #fdfbfb; 
             }
             body.dark-mode {
                 background: #1e1e1e;
@@ -384,7 +388,7 @@
                 max-width: 100%; 
                 border-radius: 0; 
                 margin: 0; 
-                padding: 70px 15px 30px 15px; /* Platz oben für absolute Buttons */
+                padding: 70px 10px 30px 10px; 
                 box-shadow: none; 
                 border: none;
             }
@@ -395,14 +399,15 @@
             #mpg-blast-link { top: 15px; left: 15px; padding: 8px 14px; font-size: 13px; }
             #dark-mode-toggle { top: 15px; right: 15px; width: 38px; height: 38px; font-size: 18px; }
 
-            /* Lehrer Auswahl kompakter */
+            /* Lehrer Auswahl: Zwingend 3 Spalten nebeneinander */
             .controls { flex-direction: column; width: 100%; gap: 8px; }
             .controls button { width: 100%; margin: 0; }
-            .teacher-grid { grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 8px; }
-            .teacher-item { padding: 10px 5px; }
-            .teacher-lastname { font-size: 13px; }
+            .teacher-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+            .teacher-item { padding: 8px 4px; border-radius: 8px; }
+            .teacher-prefix { font-size: 10px; }
+            .teacher-lastname { font-size: 12px; }
 
-            /* Duell Arena für kleine Bildschirme gestapelt */
+            /* Duell Arena gestapelt */
             .battle-arena { flex-direction: column; gap: 15px; margin-top: 15px; align-items: stretch; }
             .card { width: 100%; max-width: 100%; padding: 15px; box-sizing: border-box; }
             
@@ -414,14 +419,35 @@
             .vs { font-size: 20px; padding: 5px; margin: -10px auto; z-index: 2; width: 40px; height: 40px; border-radius: 50%; background: #eaedf0; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
             body.dark-mode .vs { background: #2c2c2c; color: #adb5bd; }
 
-            /* Aktionsbuttons unter Duell */
             .action-buttons { flex-direction: column; gap: 10px; margin-top: 25px; }
             .action-buttons button { width: 100%; padding: 14px; margin: 0; font-size: 15px; }
 
-            /* Tabelle Mobile */
-            .results-table th, .results-table td { padding: 12px 4px; font-size: 13px; }
-            .results-table td.name-col { font-size: 14px; padding-left: 8px; }
-            .results-table tr.rank-row-1 td.name-col { font-size: 15px; }
+            /* Top 10 Mobile Fix */
+            .top10-sidebar { padding: 15px 10px; }
+            .top10-list .rank { font-size: 14px; width: 30px; }
+            .top10-list li.rank-1 .rank { font-size: 18px; }
+            .top10-list .name { font-size: 14px; }
+            .top10-list .stats { gap: 4px; font-size: 12px; }
+            .stat-wins, .stat-losses { width: 30px; text-align: center; }
+            .stat-quote { width: 35px; text-align: right; }
+
+            /* Haupttabelle Mobile Fix - Erzwingt Platz für Spalten */
+            .full-list-main { padding: 15px 5px; border-radius: 10px; }
+            .results-table th, .results-table td { padding: 8px 2px; font-size: 12px; }
+            
+            /* Erzwinge genaue Breiten per CSS auf Mobile, damit nichts wegbricht */
+            .results-table th:nth-child(1), .results-table td:nth-child(1) { width: 30px !important; min-width: 30px; } /* Rang/Medaille */
+            .results-table th:nth-child(2), .results-table td:nth-child(2) { width: auto !important; max-width: 80px; } /* Name */
+            .results-table td.name-col { font-size: 12px; padding-left: 4px; }
+            .results-table tr.rank-row-1 td.name-col { font-size: 14px; }
+            
+            .results-table th:nth-child(3), .results-table td:nth-child(3),
+            .results-table th:nth-child(4), .results-table td:nth-child(4),
+            .results-table th:nth-child(5), .results-table td:nth-child(5),
+            .results-table th:nth-child(6), .results-table td:nth-child(6) { width: 28px !important; } /* Werte */
+            
+            .results-table th:nth-child(7), .results-table td:nth-child(7) { width: 40px !important; } /* Quote */
+            
             .hide-mobile { display: none; } 
         }
     </style>
@@ -1202,7 +1228,7 @@
                 let prefix = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `#${index + 1}`;
                 li.innerHTML = `
                     <div class="rank">${prefix}</div>
-                    <div class="name">${teacher.name}</div>
+                    <div class="name" title="${teacher.name}">${teacher.name}</div>
                     <div class="stats">
                         <span class="stat-wins">👍 ${teacher.globalWins}</span>
                         <span class="stat-losses">👎 ${teacher.globalLosses}</span>
