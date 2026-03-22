@@ -1206,8 +1206,12 @@ document.getElementById('btn-back-to-ranking').addEventListener('click', () => {
     window.location.href = '../index.html';
 });
 
-// --- NEU: Direkt in der Rangliste starten ---
-// Versteckt den normalen Startbildschirm beim Laden der Seite
+// --- NEU: Direkt im Ranglisten-Setup (Namenseingabe) starten ---
+// 1. Versteckt den normalen Startbildschirm
 document.getElementById('ice-start-screen').classList.add('hidden');
-// Zeigt sofort das Ranking-Overlay an
-showLeaderboard();
+// 2. Versteckt die Top-Spieler-Liste zur Sicherheit
+document.getElementById('leaderboard-screen').classList.add('hidden'); 
+// 3. Zeigt den Setup-Screen für Namen und Profilbild
+document.getElementById('ranked-setup-screen').classList.remove('hidden');
+// 4. Lädt den zuletzt genutzten Namen direkt in das Eingabefeld
+document.getElementById('ranked-name-input').value = localStorage.getItem('lastRankedName') || "";
