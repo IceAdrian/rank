@@ -637,17 +637,18 @@ input:checked + .slider:before { transform: translateX(26px); }
     display: none;
     position: fixed;
     left: 0;
-    top: 80px;
-    background-color: #facc15;
+    top: auto;
+    bottom: 25px; /* Ganz unten links statt oben */
+    background-color: rgba(250, 204, 21, 0.95); /* Etwas transparent */
     color: #1d61c2;
     border: none;
-    padding: 10px 15px;
-    border-radius: 0 12px 12px 0;
+    padding: 8px 12px;
+    border-radius: 0 10px 10px 0;
     font-weight: bold;
     z-index: 3600;
     cursor: pointer;
-    box-shadow: 2px 4px 10px rgba(0,0,0,0.5);
-    font-size: 16px;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.4);
+    font-size: 13px; /* Deutlich kleiner */
 }
 
 @media (max-width: 950px) {
