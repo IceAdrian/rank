@@ -68,7 +68,7 @@
     </div>
 
     <div class="header">
-        <button id="btn-back-to-ranking" onclick="window.location.href='../index.html'" style="background-color: #facc15; color: #1d61c2; border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; margin-right: auto; box-shadow: 0 4px 0 #d97706; font-size: 14px;">
+        <button id="btn-back-to-ranking" onclick="window.location.href='../index.html'" style="background-color: #facc15; color: #1d61c2; border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 0 #d97706; font-size: 14px;">
             🏆 Zurück zur Rangliste
         </button>
         
@@ -189,15 +189,16 @@
 
             <div class="master-fs-item mode-selector-container">
                 <div style="width: 100%; text-align: center;"><span>Spielmodus</span></div>
+                
                 <div class="mode-options">
                     <div class="mode-option active" id="mode-standard">
                         <div class="mode-preview standard-preview"></div>
-                        <span>Premium</span>
+                        <span>Standard</span>
                     </div>
 
                     <div class="mode-option" id="mode-adrian">
                         <div class="mode-preview color-adrian"></div>
-                        <span>Express</span>
+                        <span>Premium</span>
                     </div>
 
                     <div class="mode-option" id="mode-ahmad">
@@ -269,11 +270,27 @@
         <div class="settings-content" style="display: flex; flex-direction: column; gap: 15px; align-items: center; position: relative;">
             <div class="settings-header" style="width: 100%; position: relative; min-height: 32px; justify-content: center; display: flex;">
                 <span style="font-size: 22px; text-align: center; margin: 0;">Rangliste spielen</span>
+                <span class="close-settings" id="close-ranked-setup" style="position: absolute; right: -5px; top: -5px; transform: none; display: none;">✕</span>
+            </div>
+            
+            <div style="display: flex; gap: 10px; width: 100%; align-items: center;">
+                <div id="ranked-pic-preview" style="width: 48px; height: 48px; border-radius: 50%; background-color: #3b4c73; border: 2px solid #a9b7d6; display: flex; justify-content: center; align-items: center; font-size: 24px; cursor: pointer; flex-shrink: 0; overflow: hidden;" title="Profilbild entfernen">👤</div>
+                <input type="text" id="ranked-name-input" placeholder="Dein Spielername" style="width: 100%; padding: 12px; border-radius: 8px; border: none; background: #3b4c73; color: white; font-size: 16px; font-weight: bold; outline: none;">
+            </div>
+            
+            <div style="width: 100%; margin-top: 5px;">
+                <span style="color: #a9b7d6; font-size: 14px;">Vorgefertigte Bilder:</span>
+                <div id="setup-preset-avatars" style="display: flex; gap: 8px; justify-content: center; margin-top: 8px; flex-wrap: wrap;">
                 </div>
+            </div>
             
-            <input type="text" id="ranked-name-input" placeholder="Dein Spielername" style="width: 100%; padding: 12px; border-radius: 8px; border: none; background: #3b4c73; color: white; font-size: 16px; font-weight: bold; outline: none; text-align: center;">
-            
-            <p style="color: #a9b7d6; font-size: 13px; text-align: center; margin: 0;">(Dein Profilbild kannst du später links im Menü ändern)</p>
+            <div style="width: 100%; text-align: center; color: #a9b7d6; font-size: 12px; margin: 5px 0;">- ODER EIGENES BILD -</div>
+
+            <div style="display: flex; justify-content: space-between; width: 100%;">
+                <span style="color: #a9b7d6; font-size: 14px;">Optionales Profilbild</span>
+                <span id="setup-clear-pic-btn" style="color: #ef4444; font-size: 14px; cursor: pointer; display: none;">✖ Entfernen</span>
+            </div>
+            <input type="file" id="setup-pic-input" accept="image/*" style="width: 100%; color: white;">
             
             <button class="cgo-play-btn" id="btn-start-ranked-game" style="margin-top: 10px; width: 100%;">Los geht's!</button>
         </div>
