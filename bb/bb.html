@@ -35,7 +35,10 @@
             <div class="logo-sub">ADVENTURE MASTER</div>
         </div>
 
-        <div class="start-buttons-wrapper">
+       <div class="start-buttons-wrapper">
+            <button class="btn-menu" id="btn-startscreen-back" style="background-color: #1e3a8a; color: white; border-bottom: 6px solid #1e40af; font-size: 20px; padding: 15px; margin-bottom: 10px;">
+                🔙 Zurück zur Rangliste
+            </button>
             <button class="btn-menu btn-rangliste" id="btn-start-rangliste">
                 🏆 Rangliste
                 <span class="badge-dot"></span>
@@ -247,19 +250,22 @@
         </button>
     </div>
 
-    <div id="ranked-setup-screen" class="settings-overlay hidden" style="z-index: 6000;">
+ <div id="ranked-setup-screen" class="settings-overlay hidden" style="z-index: 6000;">
         <div class="settings-content" style="display: flex; flex-direction: column; gap: 15px; align-items: center; position: relative;">
             <div class="settings-header" style="width: 100%; position: relative; min-height: 32px; justify-content: center; display: flex;">
                 <span style="font-size: 22px; text-align: center; margin: 0;">Rangliste spielen</span>
-                <span class="close-settings" id="close-ranked-setup" style="position: absolute; right: -5px; top: -5px; transform: none;">✕</span>
+                <span class="close-settings" id="close-ranked-setup" style="position: absolute; right: -5px; top: -5px; transform: none; display: none;">✕</span>
             </div>
             
-            <input type="text" id="ranked-name-input" placeholder="Dein Spielername" style="width: 100%; padding: 12px; border-radius: 8px; border: none; background: #3b4c73; color: white; font-size: 16px; font-weight: bold; outline: none;">
+            <div style="display: flex; gap: 10px; width: 100%; align-items: center;">
+                <div id="ranked-pic-preview" style="width: 48px; height: 48px; border-radius: 50%; background-color: #3b4c73; border: 2px solid #a9b7d6; display: flex; justify-content: center; align-items: center; font-size: 24px; cursor: pointer; flex-shrink: 0; overflow: hidden;" title="Profilbild entfernen">👤</div>
+                <input type="text" id="ranked-name-input" placeholder="Dein Spielername" style="width: 100%; padding: 12px; border-radius: 8px; border: none; background: #3b4c73; color: white; font-size: 16px; font-weight: bold; outline: none;">
+            </div>
             
             <div style="width: 100%; margin-top: 5px;">
                 <span style="color: #a9b7d6; font-size: 14px;">Vorgefertigte Bilder:</span>
                 <div id="preset-avatars" style="display: flex; gap: 8px; justify-content: center; margin-top: 8px; flex-wrap: wrap;">
-                    </div>
+                </div>
             </div>
             
             <div style="width: 100%; text-align: center; color: #a9b7d6; font-size: 12px; margin: 5px 0;">- ODER EIGENES BILD -</div>
