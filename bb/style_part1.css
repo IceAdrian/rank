@@ -284,17 +284,3 @@ body.square-ui * { border-radius: 0 !important; }
     box-shadow: inset 1px 1px 3px rgba(255, 255, 255, 0.4), inset -1px -1px 3px rgba(0, 0, 0, 0.3);
 }
 
-.flying-meme {
-    position: fixed;
-    z-index: 9999;
-    pointer-events: none;
-    width: 250px;
-    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
-    animation: flyAcrossScreen 3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
-
-@keyframes flyAcrossScreen {
-    0% { left: -300px; top: 60%; transform: translateY(-50%) rotate(-15deg); }
-    50% { top: 30%; transform: translateY(-50%) rotate(10deg) scale(1.2); }
-    100% { left: 100vw; top: 60%; transform: translateY(-50%) rotate(-15deg); }
-}
